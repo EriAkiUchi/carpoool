@@ -46,7 +46,7 @@ class Passageiro {
             genero: data.genero,
 
             // Convertendo o Timestamp para um objeto Date
-            dataNascimento: data.dataNascimento.toDate()
+            dataNascimento: data.dataNascimento.toDate().toLocaleDateString('pt-BR')
         }
     }
 }
