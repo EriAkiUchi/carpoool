@@ -17,7 +17,7 @@ class Motorista {
         this.genero = genero;        
 
         // Se a data de nascimento for passada, converte para um objeto Timestamp
-        this.dataNascimento = dataNascimento ? admin.firestore.Timestamp.fromDate(new Date(dataNascimento).toLocaleDateString('pt-BR')) : admin.firestore.Timestamp.now();
+        this.dataNascimento = dataNascimento ? admin.firestore.Timestamp.fromDate(new Date(dataNascimento)) : admin.firestore.Timestamp.now();
     }
 
     // Método para converter um objeto Passageiro para um documento que será salvo no Firestore
