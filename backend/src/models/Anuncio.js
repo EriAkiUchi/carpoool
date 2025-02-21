@@ -38,7 +38,7 @@ class Anuncio {
             vagasRestantes: data.vagasRestantes,
 
 
-            horarioDeSaida: data.horarioDeSaida.toDate().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            horarioDeSaida: data.horarioDeSaida
         }
     }
 }
