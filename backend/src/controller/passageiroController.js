@@ -1,4 +1,18 @@
+import axios from 'axios';
 import Passageiro from '../models/Passageiro.js'
+
+const MAPS_API_KEY = process.env.MAPS_API_KEY;
+
+// Função para converter um endereço em coordenadas
+async function geocodeAddress(address) {
+    const resposta = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address.logradouro},${address.numero},${address.bairro},${address.cidade}&key=${MAPS_API_KEY}`);
+    if (resposta.data.status === 'OK') {
+        const { lat, lng } = resposta.data.results[0].geometry.location;
+        return { lat, lng };
+    } else {
+        throw new Error('Endereço não encontrado:', resposta.data.status);
+    }
+}
 
 class PassageiroController{
 
@@ -37,7 +51,9 @@ class PassageiroController{
     static async createPassageiro(req, res, firestore) {
         try {
             const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero } = req.body;
-            const passageiro = new Passageiro(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero);
+            const coordenadasOrigem = await geocodeAddress(enderecoOrigem);
+            const coordenadasDestino = await geocodeAddress(enderecoDestino);
+            const passageiro = new Passageiro(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, coordenadasOrigem, coordenadasDestino);
 
             // Salvando o passageiro no Firestore
             const docRef = await firestore.collection('passageiros').add(passageiro.toFirestore());

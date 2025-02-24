@@ -3,6 +3,7 @@ import PassageiroController from '../controller/passageiroController.js';
 import MotoristaController from '../controller/motoristaController.js';
 import CarroController from '../controller/carroController.js';
 import AnuncioController from '../controller/anuncioController.js';
+import MapsController from '../controller/MapsController.js';
 
 const routes = (app, firestore) => {
     app.use(express.json());
@@ -35,6 +36,9 @@ const routes = (app, firestore) => {
     app.delete('/motoristas/:id', async (req, res) => MotoristaController.deleteMotorista(req, res, req.app.locals.firestore));
     app.delete('/carros/:id', async (req, res) => CarroController.deleteCarro(req, res, req.app.locals.firestore));
     app.delete(`/anuncios/:id`, async (req, res) => AnuncioController.deleteAnuncio(req, res, req.app.locals.firestore));
+
+    app.get('/rota/morista-mais-proximo/:passageiroId', async (req, res) => MapsController.calcularMotoristaMaixProximo(req, res, req.app.locals.firestore));
+    app.post('/rota/calcular-viagem', async (req, res) => MapsController.calcularRotaViagem(req, res, req.app.locals.firestore));
 
 }
 

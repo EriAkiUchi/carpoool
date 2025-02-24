@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 
 class Motorista {
-    constructor(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero) {
+    constructor(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, coordenadasOrigem, coordenadasDestino) {
         if(!nome || !email || !senha || !enderecoOrigem || !enderecoDestino || !dataNascimento) {
             for (const [key, value] of Object.entries({nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento})) {
                 if(!value) {
@@ -12,12 +12,36 @@ class Motorista {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
-        this.enderecoOrigem = enderecoOrigem;
-        this.enderecoDestino = enderecoDestino;
-        this.genero = genero;        
+        this.enderecoOrigem = {
+            logradouro: enderecoOrigem.logradouro,
+            numero: enderecoOrigem.numero,
+            bairro: enderecoOrigem.bairro,
+            cidade: enderecoOrigem.cidade,
+        };
+        this.enderecoDestino = {
+            logradouro: enderecoDestino.logradouro,
+            numero: enderecoDestino.numero,
+            bairro: enderecoDestino.bairro,
+            cidade: enderecoDestino.cidade,
+        };
+        this.genero = genero;     
+        this.coordenadasOrigem = {
+            lat: coordenadasOrigem.lat,
+            lng: coordenadasOrigem.lng
+        };
+        this.coordenadasDestino = {
+            lat: coordenadasDestino.lat,
+            lng: coordenadasDestino.lng
+        };   
 
-        // Se a data de nascimento for passada, converte para um objeto Timestamp
-        this.dataNascimento = dataNascimento ? admin.firestore.Timestamp.fromDate(new Date(dataNascimento)) : admin.firestore.Timestamp.now();
+        // Converte a data de nascimento para o formato ISO antes de criar o objeto Date
+        this.dataNascimento = dataNascimento ? admin.firestore.Timestamp.fromDate(new Date(this.convertDateToISO(dataNascimento))) : admin.firestore.Timestamp.now();
+    }
+
+    // Método para converter uma data de "DD/MM/YYYY" para "YYYY-MM-DD"
+    convertDateToISO(date) {
+        const [day, month, year] = date.split('/');
+        return `${year}-${month}-${day}T03:00:00Z`;
     }
 
     // Método para converter um objeto Passageiro para um documento que será salvo no Firestore
@@ -26,10 +50,28 @@ class Motorista {
             nome: this.nome,
             email: this.email,
             senha: this.senha,
-            enderecoOrigem: this.enderecoOrigem,
-            enderecoDestino: this.enderecoDestino,
+            enderecoOrigem: {
+                logradouro: this.enderecoOrigem.logradouro,
+                numero: this.enderecoOrigem.numero,
+                bairro: this.enderecoOrigem.bairro,
+                cidade: this.enderecoOrigem.cidade,
+            },
+            enderecoDestino: {
+                logradouro: this.enderecoDestino.logradouro,
+                numero: this.enderecoDestino.numero,
+                bairro: this.enderecoDestino.bairro,
+                cidade: this.enderecoDestino.cidade,
+            },
             dataNascimento: this.dataNascimento,
-            genero: this.genero
+            genero: this.genero,
+            coordenadasOrigem: {
+                lat: this.coordenadasOrigem.lat,
+                lng: this.coordenadasOrigem.lng
+            },
+            coordenadasDestino: {
+                lat: this.coordenadasDestino.lat,
+                lng: this.coordenadasDestino.lng
+            }
         };
     }
 
@@ -41,12 +83,34 @@ class Motorista {
             nome: data.nome,
             email: data.email,
             senha: data.senha,
-            enderecoOrigem: data.enderecoOrigem,
-            enderecoDestino: data.enderecoDestino,
+            enderecoOrigem: {
+                logradouro: data.enderecoOrigem.logradouro,
+                numero: data.enderecoOrigem.numero,
+                bairro: data.enderecoOrigem.bairro,
+                cidade: data.enderecoOrigem.cidade,
+            },
+            enderecoDestino: {
+                logradouro: data.enderecoDestino.logradouro,
+                numero: data.enderecoDestino.numero,
+                bairro: data.enderecoDestino.bairro,
+                cidade: data.enderecoDestino.cidade,
+            },
             genero: data.genero,
+            coordenadasOrigem: {
+                lat: data.coordenadasOrigem.lat,
+                lng: data.coordenadasOrigem.lng
+            },
+            coordenadasDestino: {
+                lat: data.coordenadasDestino.lat,
+                lng: data.coordenadasDestino.lng
+            },
 
             // Convertendo o Timestamp para um objeto Date
-            dataNascimento: data.dataNascimento.toDate().toLocaleDateString('pt-BR')
+            dataNascimento: data.dataNascimento.toDate().toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'                
+            })
         }
     }
 }
