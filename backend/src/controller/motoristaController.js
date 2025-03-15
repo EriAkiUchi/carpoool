@@ -16,6 +16,18 @@ async function geocodeAddress(address) {
 
 class MotoristaController{
 
+    /** 
+     * @swagger
+     * /motoristas:
+     *  get:
+     *    summary: Retorna todos os motoristas
+     *    responses:
+     *       200:
+     *         description: Lista de motoristas
+     *       500:
+     *         description: Erro em pegar os motoristas
+     */
+
     static async getMotoristas(req, res, firestore) {
         try {
             const snapshot = await firestore.collection('motoristas').get();
@@ -29,6 +41,25 @@ class MotoristaController{
         }
     }
 
+    /**
+     * @swagger
+     * /motoristas/{id}:
+     *  get:
+     *    summary: Retorna um motorista pelo ID
+     *    parameters:
+     *      - in: path 
+     *        name: id
+     *        required: true
+     *        schema:
+     *          type: string
+     *    responses:
+     *      200:
+     *        description: Motorista encontrado
+     *      404:
+     *        description: Motorista não encontrado
+     *      500:
+     *        description: Erro em pegar o motorista
+     */
     static async getMotoristaId(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -48,6 +79,57 @@ class MotoristaController{
         }
     }
 
+    /**
+     * @swagger
+     * /motoristas:
+     *  post:
+     *    summary: Cria um motorista
+     *    requestBody:
+     *      required: true
+     *      content:
+     *        application/json:
+     *          schema:
+     *            type: object
+     *            properties:
+     *              nome:
+     *                type: string
+     *              email:
+     *                type: string
+     *              senha:
+     *                type: string
+     *              enderecoOrigem:
+     *                type: object
+     *                properties:
+     *                 logradouro:
+     *                   type: string
+     *                 numero:
+     *                   type: number
+     *                 bairro:
+     *                   type: string
+     *                 cidade:
+     *                   type: string
+     *              enderecoDestino:
+     *                type: object
+     *                properties:
+     *                  logradouro:
+     *                    type: string
+     *                  numero:
+     *                    type: number
+     *                  bairro:
+     *                    type: string
+     *                  cidade:
+     *                    type: string
+     *              dataNascimento:
+     *                type: string
+     *              genero:
+     *                type: string
+     *    responses:
+     *      201:
+     *        description: Motorista criado com sucesso
+     *      500:
+     *        description: Erro em criar o motorista
+     */
+
     static async createMotorista(req, res, firestore) {
         try {
             const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero } = req.body;
@@ -63,6 +145,65 @@ class MotoristaController{
             res.status(500).json({ message: 'erro em criar o motorista: ' + erro });
         }
     }
+
+    /**
+     * @swagger
+     * /motoristas/{id}:
+     *   put:
+     *     summary: Atualiza um motorista pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               nome:
+     *                 type: string
+     *               email:
+     *                 type: string 
+     *               senha:
+     *                 type: string
+     *               enderecoOrigem:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               enderecoDestino:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               dataNascimento:
+     *                 type: string
+     *               genero:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Motorista atualizado com sucesso
+     *       404:
+     *         description: Motorista não encontrado
+     *       500:
+     *         description: Erro em atualizar o motorista
+     */
 
     static async updateMotorista(req, res, firestore) {
         try {
@@ -111,6 +252,26 @@ class MotoristaController{
             res.status(500).json({ message: 'erro em atualizar o motorista: ' + erro });
         }
     }
+
+    /**
+     * @swagger
+     * /motoristas/{id}:
+     *   delete:
+     *     summary: Deleta um motorista pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Motorista deletado com sucesso
+     *       404:
+     *         description: Motorista não encontrado
+     *       500:
+     *         description: Erro em deletar o motorista
+     */
 
     static async deleteMotorista(req, res, firestore) {
         try {

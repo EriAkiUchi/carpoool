@@ -16,6 +16,17 @@ async function geocodeAddress(address) {
 
 class PassageiroController{
 
+    /**
+     * @swagger
+     * /passageiros:
+     *   get:
+     *     summary: Retorna todos os passageiros
+     *     responses:
+     *       200:
+     *         description: Lista de passageiros
+     *       500:
+     *         description: Erro em pegar os passageiros
+     */
     static async getPassageiros(req, res, firestore) {
         try {
             const snapshot = await firestore.collection('passageiros').get();
@@ -29,6 +40,25 @@ class PassageiroController{
         }
     }
 
+    /**
+     * @swagger
+     * /passageiros/{id}:
+     *   get:
+     *     summary: Retorna um passageiro pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Passageiro encontrado
+     *       404:
+     *         description: Passageiro não encontrado
+     *       500:
+     *         description: Erro em pegar o passageiro
+     */
     static async getPassageiroId(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -48,6 +78,56 @@ class PassageiroController{
         }
     }
 
+    /**
+     * @swagger
+     * /passageiros:
+     *   post:
+     *     summary: Cria um novo passageiro
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               nome:
+     *                 type: string
+     *               email:
+     *                 type: string 
+     *               senha:
+     *                 type: string
+     *               enderecoOrigem:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               enderecoDestino:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               dataNascimento:
+     *                 type: string
+     *               genero:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Passageiro criado com sucesso
+     *       500:
+     *         description: Erro em criar o passageiro
+     */
     static async createPassageiro(req, res, firestore) {
         try {
             const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero } = req.body;
@@ -64,6 +144,64 @@ class PassageiroController{
         }
     }
 
+    /**
+     * @swagger
+     * /passageiros/{id}:
+     *   put:
+     *     summary: Atualiza um passageiro pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               nome:
+     *                 type: string
+     *               email:
+     *                 type: string 
+     *               senha:
+     *                 type: string
+     *               enderecoOrigem:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               enderecoDestino:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               dataNascimento:
+     *                 type: string
+     *               genero:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Passageiro atualizado com sucesso
+     *       404:
+     *         description: Passageiro não encontrado
+     *       500:
+     *         description: Erro em atualizar o passageiro
+     */
     static async updatePassageiro(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -110,14 +248,40 @@ class PassageiroController{
         }
     }
 
+    /**
+     * @swagger
+     * /passageiros/{id}:
+     *   delete:
+     *     summary: Deleta um passageiro pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Passageiro deletado com sucesso
+     *       404:
+     *         description: Passageiro não encontrado
+     *       500:
+     *         description: Erro em deletar o passageiro
+     */
+
     static async deletePassageiro(req, res, firestore) {
         try {
             const { id } = req.params;
-            await firestore.collection('passageiros').doc(id).delete();
-            res.status(200).json({ message: 'passageiro deletado com sucesso!', id });
+            const docRef = firestore.collection('passageiros').doc(id);
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Passageiro não encontrado' });
+            }
+
+            res.status(200).json({ message: 'Passageiro deletado com sucesso!', id });
 
         } catch (erro) {
-            res.status(500).json({ message: 'erro em deletar o passageiro: ' + erro });
+            res.status(500).json({ message: 'erro em deletar o Passageiro: ' + erro });
         }
     }
 }

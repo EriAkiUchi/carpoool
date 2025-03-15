@@ -1,6 +1,17 @@
 import Anuncio from '../models/Anuncio.js';
 
 class AnuncioController {
+    /**
+     * @swagger
+     * /anuncios:
+     *   get:
+     *     summary: Retorna todos os anúncios
+     *     responses:
+     *       200:
+     *         description: Lista de anúncios
+     *       500:
+     *         description: Erro em pegar os anúncios
+     */
     static async getAnuncios(req, res, firestore) {
         try {
             const snapshot = await firestore.collection('anuncios').get();
@@ -14,6 +25,25 @@ class AnuncioController {
         }
     }
 
+    /**
+     * @swagger
+     * /anuncios/{id}:
+     *   get:
+     *     summary: Retorna um anúncio pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Anúncio encontrado
+     *       404:
+     *         description: Anúncio não encontrado
+     *       500:
+     *         description: Erro em pegar o anúncio
+     */
     static async getAnuncioId(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -33,6 +63,41 @@ class AnuncioController {
         }
     }
 
+    /**
+     * @swagger
+     * /anuncios:
+     *   post:
+     *     summary: Cria um novo anúncio
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               nomeEmpresa:
+     *                 type: string
+     *               enderecoDestino:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               vagasRestantes:
+     *                 type: number
+     *               horarioDeSaida:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Anúncio criado com sucesso
+     *       500:
+     *         description: Erro em criar o anúncio
+     */
     static async createAnuncio(req, res, firestore) {
         try {
             const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
@@ -47,6 +112,49 @@ class AnuncioController {
         }
     }
 
+    /**
+     * @swagger
+     * /anuncios/{id}:
+     *   put:
+     *     summary: Atualiza um anúncio pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               nomeEmpresa:
+     *                 type: string
+     *               enderecoDestino:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               vagasRestantes:
+     *                 type: number
+     *               horarioDeSaida:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Anúncio atualizado com sucesso
+     *       404:
+     *         description: Anúncio não encontrado
+     *       500:
+     *         description: Erro em atualizar o anúncio
+     */
     static async updateAnuncio(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -83,6 +191,25 @@ class AnuncioController {
         }
     }
 
+    /**
+     * @swagger
+     * /anuncios/{id}:
+     *   delete:
+     *     summary: Deleta um anúncio pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Anúncio deletado com sucesso
+     *       404:
+     *         description: Anúncio não encontrado
+     *       500:
+     *         description: Erro em deletar o anúncio
+     */
     static async deleteAnuncio(req, res, firestore) {
         try {
             const { id } = req.params;

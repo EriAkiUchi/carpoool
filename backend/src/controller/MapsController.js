@@ -14,6 +14,27 @@ async function calcularRota(origem, destino) {
 }
 
 class MapsController {
+
+    /**
+     * @swagger
+     * /maps/distancia/{passageiroId}:
+     *   get:
+     *    summary: Calcula o motorista mais próximo de um passageiro
+     *    parameters:
+     *     - in: path
+     *       name: passageiroId
+     *       required: true
+     *       schema:
+     *        type: string
+     *    responses:
+     *      200:
+     *        description: Motorista mais próximo encontrado
+     *      404:
+     *        description: Passageiro não encontrado
+     *      500:
+     *        description: Erro em calcular o motorista mais próximo
+     */
+
     static async calcularMotoristaMaixProximo(req, res, firestore) {
         try {
             const { passageiroId } = req.params;
@@ -54,6 +75,33 @@ class MapsController {
             res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });
         }
     }
+
+    /**
+     * @swagger
+     *  /maps/rota:
+     *   post:
+     *    summary: Calcula a rota da viagem
+     *    requestBody:
+     *      required: true
+     *      content:
+     *        application/json:
+     *          schema:
+     *            type: object
+     *            properties:
+     *              motoristaId:
+     *                type: string
+     *              passageiroId:
+     *                type: string
+     *              destinoComum:
+     *                type: string
+     *    responses:
+     *      200:
+     *         description: Rota da viagem calculada
+     *      404:
+     *         description: Motorista ou passageiro não encontrado
+     *      500:
+     *         description: Erro em calcular a rota da viagem
+     */
 
     //TODO: implementar caso tenha mais de um passageiro
     static async calcularRotaViagem(req, res, firestore) {

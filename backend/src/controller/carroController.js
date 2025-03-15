@@ -2,6 +2,18 @@ import Carro from '../models/Carro.js'
 
 class CarroController{
 
+    /**
+     * @swagger
+     * /carros:
+     *  get:
+     *      summary: Retorna todos os carros
+     *      responses:
+     *          200:
+     *              description: Lista de carros
+     *          500:
+     *              description: Erro em pegar os carros
+     */
+
     static async getCarros(req, res, firestore) {
         try {
             const snapshot = await firestore.collection('carros').get();
@@ -15,6 +27,25 @@ class CarroController{
         }
     }
 
+    /**
+     * @swagger
+     * /carros/{id}:
+     *   get:
+     *     summary: Retorna um carro pelo ID
+     *     parameters:
+     *        - in: path
+     *          name: id
+     *          required: true
+     *          schema:
+     *            type: string
+     *     responses:
+     *        200:
+     *           description: Carro encontrado
+     *        404:
+     *           description: Carro não encontrado
+     *        500:
+     *           description: Erro em pegar o carro
+    */
     static async getCarroId(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -34,6 +65,34 @@ class CarroController{
         }
     }
 
+    /**
+     * @swagger
+     * /carros:
+     *   post:
+     *      summary: Cria um carro
+     *      requestBody:
+     *          required: true
+     *          content:
+     *              application/json:
+     *                  schema:
+     *                     type: object
+     *                     properties:
+     *                         nomeModelo:
+     *                             type: string
+     *                         marca:
+     *                             type: string 
+     *                         placa:
+     *                             type: string
+     *                         cor:
+     *                             type: string
+     *      responses:
+     *          201:
+     *              description: Carro criado com sucesso
+     *          500:
+     *              description: Erro em criar o carro
+     * 
+     */
+
     static async createCarro(req, res, firestore) {
         try {
             const { nomeModelo, marca, placa, cor} = req.body;
@@ -47,6 +106,41 @@ class CarroController{
             res.status(500).json({ message: 'erro em criar o carro: ' + erro });
         }
     }
+
+    /** 
+     * @swagger
+     * /carros/{id}:
+     *  put:
+     *     summary: Atualiza um carro pelo ID
+     *     parameters:
+     *        - in: path
+     *          name: id
+     *          required: true
+     *          schema:
+     *              type: string
+     *     requestBody:
+     *          required: true
+     *          content:
+     *              application/json:
+     *                  schema:
+     *                      type: object
+     *                      properties:
+     *                          nomeModelo:
+     *                              type: string
+     *                          marca:
+     *                              type: string
+     *                          placa:
+     *                              type: string
+     *                          cor:
+     *                              type: string
+     *     responses:
+     *          200:
+     *             description: Carro atualizado com sucesso
+     *          404:
+     *             description: Carro não encontrado
+     *          500:
+     *             description: Erro em atualizar o carro
+     */
 
     static async updateCarro(req, res, firestore) {
         try {
@@ -76,11 +170,36 @@ class CarroController{
         }
     }
 
+    /** 
+     * @swagger
+     * /carros/{id}:
+     *   delete:
+     *     summary: Deleta um carro pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *        200:
+     *          description: Carro deletado com sucesso
+     *        404:
+     *          description: Carro não encontrado
+     *        500:
+     *          description: Erro em deletar o carro
+    */
+
     static async deleteCarro(req, res, firestore) {
         try {
             const { id } = req.params;
-            await firestore.collection('carros').doc(id).delete();
-            res.status(200).json({ message: 'carro deletado com sucesso!', id });
+            const docRef = firestore.collection('carros').doc(id);
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Carro não encontrado' });
+            }
+            res.status(200).json({ message: 'Carro deletado com sucesso!', id });
 
         } catch (erro) {
             res.status(500).json({ message: 'erro em deletar o carro: ' + erro });

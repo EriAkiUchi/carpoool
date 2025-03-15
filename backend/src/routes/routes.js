@@ -8,6 +8,15 @@ import MapsController from '../controller/MapsController.js';
 const routes = (app, firestore) => {
     app.use(express.json());
 
+    /**
+     * @swagger
+     * /:
+     *   get:
+     *     summary: Verifica se a API está rodando
+     *     responses:
+     *       200:
+     *         description: A API está rodando
+     */
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'A API está rodando...' });
     });
