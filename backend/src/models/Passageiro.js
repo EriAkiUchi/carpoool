@@ -35,13 +35,42 @@ class Passageiro {
         };      
 
         // Converte a data de nascimento para o formato ISO antes de criar o objeto Date
-        this.dataNascimento = dataNascimento ? admin.firestore.Timestamp.fromDate(new Date(this.convertDateToISO(dataNascimento))) : admin.firestore.Timestamp.now();
+        this.dataNascimento = this.processarDataNascimento(dataNascimento);
+    }
+
+    // Processa data de nascimento consistentemente, lidando com objetos Date e formatos de string
+    processarDataNascimento(dataNascimento) {
+        // Caso já seja instância de Date (do controller)
+        if (dataNascimento instanceof Date) {
+            return admin.firestore.Timestamp.fromDate(dataNascimento);
+        }
+        
+        // Caso seja uma string no formato "DD/MM/YYYY"
+        else if (typeof dataNascimento === 'string' && dataNascimento.includes('/')) {
+            const parts = dataNascimento.split('/');
+            if (parts.length === 3) {
+                const dia = parseInt(parts[0], 10);
+                const mes = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+                const ano = parseInt(parts[2], 10);
+                
+                const date = new Date(ano, mes, dia);
+                if (!isNaN(date.getTime())) {
+                    return admin.firestore.Timestamp.fromDate(date);
+                }
+            }
+        }
+        
+        // Caso não seja uma data válida, retorna a data atual
+        return admin.firestore.Timestamp.now();
     }
 
     // Método para converter uma data de "DD/MM/YYYY" para "YYYY-MM-DD"
     convertDateToISO(date) {
-        const [day, month, year] = date.split('/');
-        return `${year}-${month}-${day}T03:00:00Z`;
+        if (typeof date !== 'string' && date.includes('/')) {
+            const [day, month, year] = date.split('/');
+            return `${year}-${month}-${day}T03:00:00Z`;
+        }
+        return date;
     }
 
     // Método para converter um objeto Passageiro para um documento que será salvo no Firestore

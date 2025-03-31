@@ -131,9 +131,30 @@ class PassageiroController{
     static async createPassageiro(req, res, firestore) {
         try {
             const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero } = req.body;
+        
+        // Parse dataNascimento to ensure Brazilian format (DD/MM/YYYY)
+        let dataNascimentoFormatada;
+        if (dataNascimento) {
+            const partes = dataNascimento.split('/');
+            if (partes.length === 3) {
+                // Assume Brazilian format: DD/MM/YYYY
+                const dia = parseInt(partes[0], 10);
+                const mes = parseInt(partes[1], 10) - 1; // Months are 0-indexed in JS
+                const ano = parseInt(partes[2], 10);
+                dataNascimentoFormatada = new Date(ano, mes, dia);
+                
+                // Validate if the date is valid
+                if (isNaN(dataNascimentoFormatada.getTime())) {
+                    return res.status(400).json({ message: 'Data de nascimento inválida. Use o formato DD/MM/YYYY.' });
+                }
+            } else {
+                return res.status(400).json({ message: 'Data de nascimento inválida. Use o formato DD/MM/YYYY.' });
+            }
+        }
+        
             const coordenadasOrigem = await geocodeAddress(enderecoOrigem);
             const coordenadasDestino = await geocodeAddress(enderecoDestino);
-            const passageiro = new Passageiro(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, coordenadasOrigem, coordenadasDestino);
+            const passageiro = new Passageiro(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimentoFormatada, genero, coordenadasOrigem, coordenadasDestino);
 
             // Salvando o passageiro no Firestore
             const docRef = await firestore.collection('passageiros').add(passageiro.toFirestore());
