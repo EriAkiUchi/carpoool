@@ -125,6 +125,8 @@ class PassageiroController{
      *     responses:
      *       201:
      *         description: Passageiro criado com sucesso
+     *       400:
+     *         description: Data de nascimento inválida. Use o formato DD/MM/YYYY
      *       500:
      *         description: Erro em criar o passageiro
      */

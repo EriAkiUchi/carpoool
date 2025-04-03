@@ -126,6 +126,8 @@ class MotoristaController{
      *    responses:
      *      201:
      *        description: Motorista criado com sucesso
+     *      400:
+     *        description: Data de nascimento inválida. Use o formato DD/MM/YYYY
      *      500:
      *        description: Erro em criar o motorista
      */
