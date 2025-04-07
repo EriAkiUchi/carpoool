@@ -4,8 +4,11 @@ import MotoristaController from '../controller/motoristaController.js';
 import CarroController from '../controller/carroController.js';
 import AnuncioController from '../controller/anuncioController.js';
 import MapsController from '../controller/MapsController.js';
+import AuthController from '../controller/authController.js';
+import cors from 'cors';
 
 const routes = (app, firestore) => {
+    app.use(cors());
     app.use(express.json());
 
     /**
@@ -35,6 +38,8 @@ const routes = (app, firestore) => {
     app.post('/motoristas', async (req, res) => MotoristaController.createMotorista(req, res, req.app.locals.firestore));
     app.post('/carros', async (req, res) => CarroController.createCarro(req, res, req.app.locals.firestore));
     app.post(`/anuncios`, async (req, res) => AnuncioController.createAnuncio(req, res, req.app.locals.firestore));
+    app.post('/login/passageiro', async (req, res) => AuthController.loginPassageiro(req, res, req.app.locals.firestore));
+    app.post('/login/motorista', async (req, res) => AuthController.loginMotorista(req, res, req.app.locals.firestore));
 
     app.put('/passageiros/:id', async (req, res) => PassageiroController.updatePassageiro(req, res, req.app.locals.firestore));
     app.put('/motoristas/:id', async (req, res) => MotoristaController.updateMotorista(req, res, req.app.locals.firestore));
