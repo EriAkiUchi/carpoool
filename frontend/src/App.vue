@@ -26,21 +26,18 @@ function logout() {
       <RouterLink to="/">Home</RouterLink>
 
       <!-- Liniks para usuários autenticados baseado no tipo -->
-      <template v-if="isAuthenticated && userType === 'passageiro'">
-      <RouterLink to="/passageiro">Meu Dashboard</RouterLink>
-      </template>
+      <RouterLink to="/passageiro" v-if="isAuthenticated && userType === 'passageiro'">
+        Meu Dashboard
+      </RouterLink>
 
-      <template v-if="isAuthenticated && userType === 'motorista'">
-        <RouterLink to="/motorista">Meu Dashboard</RouterLink>
-      </template>
+      <RouterLink to="/motorista" v-if="isAuthenticated && userType === 'motorista'">
+        Meu Dashboard
+      </RouterLink>
 
       <!-- Links para login/logout -->
-      <template v-if="isAuthenticated">
-        <a href="#" @click.prevent="logout">Sair</a>
-      </template>
-      <template v-else>
-        <RouterLink to="/login">Login</RouterLink>
-      </template>
+      <a href="#" @click.prevent="logout" v-if="isAuthenticated">Sair</a>
+
+      <RouterLink v-else to="/login">Login</RouterLink>
 
     </nav>
   </header>
@@ -62,6 +59,8 @@ body {
 }
 
 header {
+  width: 100%;
+  height: 20%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -97,14 +96,17 @@ nav a:hover {
 }
 
 main {
-  min-height: calc(100vh - 160px);
   padding: 2rem;
 }
 
 footer {
   text-align: center;
   padding: 1rem;
-  background-color: #f5f5f5;
-  border-top: 1px solid #eee;
+
+  background-color: var(--bg-color);
+  color: var(--text-color);
+
+  position: absolute;
+  bottom: 0;
 }
 </style>

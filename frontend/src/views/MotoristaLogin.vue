@@ -148,4 +148,10 @@ input {
 .links-section a:hover {
   text-decoration: underline;
 }
+
+footer {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
 </style>

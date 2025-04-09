@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import LoginView from '@/views/LoginView.vue';
 import authService from '@/services/authService';
-import App from '@/App.vue';
+import Home from '@/views/Home.vue';
 
 const rotas: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: App,
+    component: Home,
   },
   {
     path: '/login',
@@ -26,6 +26,11 @@ const rotas: RouteRecordRaw[] = [
     path: '/login/motorista',
     name: 'login-motorista',
     component: () => import('../views/MotoristaLogin.vue'),
+  },
+  {
+    path: '/cadastro',
+    name: 'cadastro',
+    component: () => import('../views/CadastroView.vue'),
   },
   {
     path: '/cadastro/passageiro',
