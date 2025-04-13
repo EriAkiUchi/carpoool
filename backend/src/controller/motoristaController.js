@@ -300,6 +300,13 @@ class MotoristaController{
     static async deleteMotorista(req, res, firestore) {
         try {
             const { id } = req.params;
+            const docRef = firestore.collection('motoristas').doc(id); // Referência para o documento do motorista
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Motorista não encontrado' });
+            }
+            
             await firestore.collection('motoristas').doc(id).delete();
             res.status(200).json({ message: 'motorista deletado com sucesso!', id });
             
