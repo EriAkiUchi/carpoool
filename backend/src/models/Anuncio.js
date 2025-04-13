@@ -10,9 +10,6 @@ class Anuncio {
         this.nomeEmpresa = nomeEmpresa;
         this.enderecoDestino = enderecoDestino;
         this.vagasRestantes = vagasRestantes;
-
-        //TODO: determinar qual formato de data e hora devo usar
-        //date? string?
         this.horarioDeSaida = horarioDeSaida; 
     }
 
