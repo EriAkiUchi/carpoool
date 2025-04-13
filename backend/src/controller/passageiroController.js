@@ -301,6 +301,7 @@ class PassageiroController{
                 return res.status(404).json({ message: 'Passageiro não encontrado' });
             }
 
+            await firestore.collection('passageiros').doc(id).delete(); // Deleta o passageiro
             res.status(200).json({ message: 'Passageiro deletado com sucesso!', id });
 
         } catch (erro) {
