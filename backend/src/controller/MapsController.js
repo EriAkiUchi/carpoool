@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Passageiro from '../models/Passageiro.js';
+import MapaDeRota from '../models/MapaDeRota.js';
 
 const MAPS_API_KEY = process.env.MAPS_API_KEY;
 
@@ -11,6 +11,17 @@ async function calcularDistancia(origem, destino) {
 async function calcularRota(origem, destino) {
     const resposta = await axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${origem}&destination=${destino}&key=${MAPS_API_KEY}`);
     return resposta.data;
+}
+
+// Função para converter um endereço em coordenadas
+async function geocodeAddress(address) {
+    const resposta = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address.logradouro},${address.numero},${address.bairro},${address.cidade}&key=${MAPS_API_KEY}`);
+    if (resposta.data.status === 'OK') {
+        const { lat, lng } = resposta.data.results[0].geometry.location;
+        return { lat, lng };
+    } else {
+        throw new Error('Endereço não encontrado:', resposta.data.status);
+    }
 }
 
 class MapsController {
@@ -78,7 +89,7 @@ class MapsController {
 
     /**
      * @swagger
-     *  /maps/rota:
+     * /maps/rota/calcular-viagem:
      *   post:
      *    summary: Calcula a rota da viagem
      *    requestBody:
@@ -103,8 +114,7 @@ class MapsController {
      *         description: Erro em calcular a rota da viagem
      */
 
-    //TODO: implementar caso tenha mais de um passageiro
-    static async calcularRotaViagem(req, res, firestore) {
+    static async calcularRotaViagem(req, res, firestore, callOrigin = null) {
         try {
             const { motoristaId, passageirosIds, destinoComum } = req.body;
 
@@ -132,7 +142,8 @@ class MapsController {
                 passageiros.push(passageiro);
             }
             
-
+            let pontoAtual
+            const rotasParaPassageiros = [];
             const origemMotorista = `${motorista.coordenadasOrigem.lat},${motorista.coordenadasOrigem.lng}`;
             // Caso de apenas um passageiro (mantendo a lógica original)
             if (passageiros.length === 1) {
@@ -140,71 +151,297 @@ class MapsController {
                 const origemPassageiro = `${passageiro.coordenadasOrigem.lat},${passageiro.coordenadasOrigem.lng}`;
                 
                 const rotaData = await calcularRota(origemMotorista, origemPassageiro);
-                const rotaParaPassageiro = rotaData.routes[0];
-                
-                const rotaFinalData = await calcularRota(origemPassageiro, destinoComum);
-                const rotaFinal = rotaFinalData.routes[0];
-                
-                return res.status(200).json({ 
-                    rotas: [rotaParaPassageiro],
-                    rotaFinal 
+                rotasParaPassageiros.push({
+                    passageiroId: passageiro.id,
+                    rota: rotaData.routes[0]
                 });
+                                
+                pontoAtual = origemPassageiro;
+                // return res.status(200).json({ 
+                //     rotas: [rotaParaPassageiro],
+                //     rotaFinal 
+                // });
             }
             // Caso de múltiplos passageiros
-            // Precisamos determinar a ordem ótima para buscar os passageiros
-            let pontoAtual = origemMotorista;
-            const rotasParaPassageiros = [];
-            const passageirosRestantes = [...passageiros];
-
-            // Para cada passageiro que precisamos buscar
-            while (passageirosRestantes.length > 0) {
-                let melhorPassageiro = null; //meljor passageiro para buscar
-                let menorDistancia = Infinity;
-                let melhorRota = null; //melhor rota para buscar o passageiro
-                let melhorIndex = -1;
-                
-                // Encontrar o passageiro mais próximo do ponto atual
-                for (let i = 0; i < passageirosRestantes.length; i++) {
-                    const passageiro = passageirosRestantes[i];
-                    const origemPassageiro = `${passageiro.coordenadasOrigem.lat},${passageiro.coordenadasOrigem.lng}`;
+            else {
+                // Precisamos determinar a ordem ótima para buscar os passageiros
+                pontoAtual = origemMotorista;
+                // const rotasParaPassageiros = [];
+                const passageirosRestantes = [...passageiros];
+    
+                // Para cada passageiro que precisamos buscar
+                while (passageirosRestantes.length > 0) {
+                    let melhorPassageiro = null; //meljor passageiro para buscar
+                    let menorDistancia = Infinity;
+                    let melhorRota = null; //melhor rota para buscar o passageiro
+                    let melhorIndex = -1;
                     
-                    const distanciaData = await calcularDistancia(pontoAtual, origemPassageiro);
-                    const distancia = distanciaData.rows[0].elements[0].distance.value;
-                    
-                    if (distancia < menorDistancia) {
-                        menorDistancia = distancia;
-                        melhorPassageiro = passageiro;
-                        melhorIndex = i;
+                    // Encontrar o passageiro mais próximo do ponto atual
+                    for (let i = 0; i < passageirosRestantes.length; i++) {
+                        const passageiro = passageirosRestantes[i];
+                        const origemPassageiro = `${passageiro.coordenadasOrigem.lat},${passageiro.coordenadasOrigem.lng}`;
                         
-                        // Também calculamos a rota para não precisar calcular novamente
-                        const rotaData = await calcularRota(pontoAtual, origemPassageiro);
-                        melhorRota = rotaData.routes[0];
+                        const distanciaData = await calcularDistancia(pontoAtual, origemPassageiro);
+                        const distancia = distanciaData.rows[0].elements[0].distance.value;
+                        
+                        if (distancia < menorDistancia) {
+                            menorDistancia = distancia;
+                            melhorPassageiro = passageiro;
+                            melhorIndex = i;
+                            
+                            // Também calculamos a rota para não precisar calcular novamente
+                            const rotaData = await calcularRota(pontoAtual, origemPassageiro);
+                            melhorRota = rotaData.routes[0];
+                        }
                     }
+                    
+                    // Adicionar a rota para o melhor passageiro
+                    rotasParaPassageiros.push({
+                        passageiroId: melhorPassageiro.id,
+                        rota: melhorRota
+                    });
+                    
+                    // Atualizar o ponto atual e remover o passageiro da lista
+                    pontoAtual = `${melhorPassageiro.coordenadasOrigem.lat},${melhorPassageiro.coordenadasOrigem.lng}`;
+                    passageirosRestantes.splice(melhorIndex, 1);
                 }
-                
-                // Adicionar a rota para o melhor passageiro
-                rotasParaPassageiros.push({
-                    passageiroId: melhorPassageiro.id,
-                    rota: melhorRota
-                });
-                
-                // Atualizar o ponto atual e remover o passageiro da lista
-                pontoAtual = `${melhorPassageiro.coordenadasOrigem.lat},${melhorPassageiro.coordenadasOrigem.lng}`;
-                passageirosRestantes.splice(melhorIndex, 1);
             }
 
             // Calcular a rota final do último passageiro até o destino comum
-            const rotaFinalData = await calcularRota(pontoAtual, destinoComum);
+            const destinoComumCoordenadas = await geocodeAddress(destinoComum);
+            const destinoComumString = `${destinoComumCoordenadas.lat},${destinoComumCoordenadas.lng}`;
+            const rotaFinalData = await calcularRota(pontoAtual, destinoComumString);
             const rotaFinal = rotaFinalData.routes[0];
             
-            res.status(200).json({ 
-                rotas: rotasParaPassageiros,
-                rotaFinal 
-            });
+            const rotaViagem = new MapaDeRota(motoristaId, passageirosIds, destinoComum, rotasParaPassageiros, rotaFinal, new Date(), 'em andamento');
 
+            const rotaRef = await firestore.collection('rotas').add(rotaViagem.toFirestore());
+
+            if(callOrigin === 'updateRotaViagem'){
+                res.status(200).json({ 
+                    id: rotaRef.id,
+                    message: 'Rota atualiada com sucesso!',
+                    modoDeAtualizacao: 'recalcular rota',
+                    rotas: rotasParaPassageiros,
+                    rotaFinal 
+                });
+            }    
+            else {
+                res.status(200).json({ 
+                    id: rotaRef.id,
+                    rotas: rotasParaPassageiros,
+                    rotaFinal 
+                });
+            }
 
         } catch (erro) {
             res.status(500).json({ message: 'erro em calcular a rota da viagem: ' + erro });
+        }
+    }
+
+    /**
+     * @swagger
+     * /maps/rota/{id}:
+     *   get:
+     *    summary: Retorna uma rota pelo ID
+     *    parameters:
+     *     - in: path
+     *       name: id
+     *       required: true
+     *       schema:
+     *        type: string
+     *    responses:
+     *      200:
+     *        description: Rota encontrada
+     *      404:
+     *        description: Rota não encontrada
+     *      500:
+     *        description: Erro em pegar a rota
+     */
+    static async getRotaId(req, res, firestore) {
+        try {
+            const { id } = req.params;
+            const doc = await firestore.collection('rotas').doc(id).get();
+            
+            if(!doc.exists){
+                return res.status(404).json({ message: 'Rota não encontrada' });
+            }
+
+            // Convertendo o documento do Firestore para um objeto MapaDeRota
+            const rota = MapaDeRota.fromFirestore(doc); 
+
+            res.status(200).json(rota);
+
+        } catch (erro) {
+            res.status(500).json({ message: 'erro em pegar a rota: ' + erro });
+        }
+    }
+
+    /**
+     * @swagger
+     * /maps/rota:
+     *   post:
+     *     summary: Cria uma nova rota
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               motoristaId:
+     *                 type: string
+     *               passageirosIds:
+     *                 type: array
+     *               destinoComum:
+     *                 type: object
+     *                 properties:
+     *                   logradouro:
+     *                     type: string
+     *                   numero:
+     *                     type: number
+     *                   bairro:
+     *                     type: string
+     *                   cidade:
+     *                     type: string
+     *               rotas:
+     *                 type: array
+     *                 items:
+     *                   type: object
+     *                   properties:
+     *                     passageiroId:
+     *                       type: string
+     *                     rota:
+     *                       type: object
+     *               rotaFinal:
+     *                 type: object      
+     *               status:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Rota criada com sucesso
+     *       500:
+     *         description: Erro ao criar rota
+     * 
+    */
+    static async createRota(req, res, firestore) {
+        try {
+            const { motoristaId, passageirosIds, destinoComum, rotas, rotaFinal } = req.body;
+            const dataCriacao = new Date();
+            const status = 'em andamento';
+
+            const mapaDeRota = new MapaDeRota(motoristaId, passageirosIds, destinoComum, rotas, rotaFinal, dataCriacao, status);
+            const rotaRef = await firestore.collection('rotas').add(mapaDeRota.toFirestore());
+
+            res.status(201).json({ id: rotaRef.id });
+        } catch (erro) {
+            res.status(500).json({ message: 'Erro ao criar rota: ' + erro });
+        }
+    }
+
+    static async updateRotaViagem(req, res, firestore) {
+        try {
+            const { id } = req.params;
+            const docRef = firestore.collection('rotas').doc(id);
+            const doc = await docRef.get();
+
+            if (!doc.exists) {
+                return res.status(404).json({ message: 'Rota não encontrada' });
+            }
+
+            const { motoristaId, passageirosIds, status } = req.body;
+            const existingData = doc.data();
+
+            if(passageirosIds === undefined) {
+                await docRef.update({ status });
+                return res.status(200).json({ message: 'Status atualizado com sucesso' });
+            }
+            //se não há mais passageiros na viagem, deleta a rota
+            else if(passageirosIds.length === 0) { 
+                res = this.deleteRotaViagem(req, res, firestore);
+                return res;
+            }
+            //um dos passageiros cancelou a viagem
+            else if(passageirosIds.length < existingData.passageirosIds.length){
+                const passageirosIdsExistentes = existingData.passageirosIds.filter(passageiroId => passageirosIds.includes(passageiroId));
+                const motoristaId = existingData.motoristaId;
+                const destinoComum = existingData.destinoComum;
+
+                req.body = {
+                    motoristaId,
+                    passageirosIds: passageirosIdsExistentes,
+                    destinoComum,
+                }
+                
+                res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
+                await firestore.collection('rotas').doc(id).delete();
+                return res;
+            }
+            // se há mais de 3 passageiros, retorna erro
+            else if(passageirosIds.length > 3){
+                return res.status(400).json({ message: 'Forneça menos de 3 passageiros' });
+            } 
+            // se foi adicionado passageiro na viagem
+            else if(passageirosIds.length > existingData.passageirosIds.length) {
+
+                const motoristaId = existingData.motoristaId;
+                const destinoComum = existingData.destinoComum;
+
+                req.body = {
+                    motoristaId,
+                    passageirosIds,
+                    destinoComum,
+                }
+                res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
+                await firestore.collection('rotas').doc(id).delete();
+                return res;
+            }
+            else if(passageirosIds.length === existingData.passageirosIds.length) {
+                const updatedFields = {}
+    
+                if (motoristaId) updatedFields.motoristaId = motoristaId;
+                if (passageirosIds) updatedFields.passageirosIds = passageirosIds;
+                if (status) updatedFields.status = status;
+    
+                if (rotaFinal) {
+                    updatedFields.rotaFinal = {
+                        ...(existingData.rotaFinal || {}),
+                        ...rotaFinal,
+                    };
+                }
+                
+                await docRef.update(updatedFields);
+                res.status(200).json({ message: 'Rota atualizada com sucesso' });
+            }
+
+        } catch (erro) {
+            res.status(500).json({ message: 'Erro ao atualizar rota: ' + erro });
+        }
+    }
+
+    static async deleteRotaViagem(req, res, firestore, callOrigin = null) {
+        try {
+            const { id } = req.params;
+            const docRef = firestore.collection('rotas').doc(id);
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Rota não encontrada' });
+            }
+
+            await firestore.collection('rotas').doc(id).delete();
+            if(callOrigin === 'updateRotaViagem'){
+                res.status(200).json({ 
+                    message: 'Rota atualizada com sucesso!',
+                    modoDeAtualizacao: 'deletar rota e a viagem',
+                    id 
+                });
+            } else {
+                res.status(200).json({ message: 'Rota deletada com sucesso!', id });
+            }
+
+        } catch (erro) {
+            res.status(500).json({ message: 'erro em deletar a Rota: ' + erro });
         }
     }
 }
