@@ -42,6 +42,7 @@ h1 {
     font-size: 2.5rem;
     color: var(--primary-color);
     margin-bottom: 0.5rem;
+    margin-top: 3rem;
     text-align: center;
 }
 
