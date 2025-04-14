@@ -23,6 +23,8 @@ import { RouterLink } from 'vue-router';
                 <RouterLink to="/login/motorista">Entrar como Motorista</RouterLink>
             </div>
         </section>
+
+        <RouterLink to="/" class="botao-voltar">Voltar</RouterLink>
     </main>
 
 </template>
@@ -79,5 +81,30 @@ h2 {
 
 .login-options a:hover {
   text-decoration: underline;
+}
+
+.botao-voltar {
+  background-color: #336699;
+  color: #fff;
+  border: none;
+
+  padding: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+  border-radius: 4px;
+
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.botao-voltar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+
+.botao-voltar:hover {
+    background-color: #264d73;
 }
 </style>

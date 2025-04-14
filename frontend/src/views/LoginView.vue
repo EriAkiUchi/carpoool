@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router';
 </script>
 
 <template>
-    <main class="login-container">
+    <section class="login-container">
         <h2>Bem-vindo ao Carpoool</h2>
         <p>Escolha como deseja entrar:</p>
         <section class="login-options">
@@ -23,16 +23,23 @@ import { RouterLink } from 'vue-router';
                 <RouterLink to="/cadastro/motorista">Cadastrar como Motorista</RouterLink>
             </div>
         </section>
-    </main>
+
+        <RouterLink to="/" class="botao-voltar">Voltar</RouterLink>
+        
+      </section>
 
 </template>
 
 <style scoped>
 .login-container {
-  max-width: 500px;
+  max-width: 30rem;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
 }
 
 h2 {
@@ -45,14 +52,14 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
 }
 
 .login-button {
   display: block;
   padding: 1rem;
   background-color: #336699;
-  color: white;
+  color: var(--vt-c-white);
   text-decoration: none;
   border-radius: 4px;
   font-weight: bold;
@@ -64,7 +71,7 @@ h2 {
 }
 
 .register-section {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   font-size: 0.9rem;
 }
 
@@ -80,4 +87,30 @@ h2 {
 .register-options a:hover {
   text-decoration: underline;
 }
+
+.botao-voltar {
+  background-color: #336699;
+  color: #fff;
+  border: none;
+
+  padding: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+  border-radius: 4px;
+
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.botao-voltar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+
+.botao-voltar:hover {
+    background-color: #264d73;
+}
+
 </style>

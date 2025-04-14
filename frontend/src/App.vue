@@ -51,16 +51,30 @@ function logout() {
   </footer>
 </template>
 
-<style scoped>
+<style>
 body {
   margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
   line-height: 1.6;
+  min-height: 100vh;
 }
+
+html {
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+</style>
+
+<style scoped>
 
 header {
   width: 100%;
-  height: 20%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -96,7 +110,9 @@ nav a:hover {
 }
 
 main {
-  padding: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 footer {
@@ -106,7 +122,5 @@ footer {
   background-color: var(--bg-color);
   color: var(--text-color);
 
-  position: absolute;
-  bottom: 0;
 }
 </style>

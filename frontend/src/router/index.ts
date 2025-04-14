@@ -8,6 +8,10 @@ const rotas: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: Home,
+    props: (router) => ({
+      isAuthenticaded: authService.isAuthenticated(),
+      userType: authService.getUserType(),
+    })
   },
   {
     path: '/login',

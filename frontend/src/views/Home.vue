@@ -1,4 +1,23 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router';
+import { computed } from 'vue';
+import { userAuthStore } from '../store/auth';
+
+const authStore = userAuthStore(); // Inicializa o store com dados do localStorage
+const isAuthenticated = computed(() => authStore.isAuthenticated); 
+const userType = computed(() => authStore.userType);
+
+defineProps({
+    isAuthenticated: {
+        type: Boolean,
+        default: false
+    },
+    userType: {
+        type: String,
+        default: ''
+    }
+});
+
 
 </script>
 
@@ -11,6 +30,10 @@
         <RouterLink to="/login" class="button">Login</RouterLink>
         
         <RouterLink to="/cadastro" class="button">Cadastrar</RouterLink>
+
+        <RouterLink v-if="isAuthenticated && userType === 'passageiro'" to="/passageiro" class="button">Acessar Dashboard</RouterLink>
+
+        <RouterLink v-if="isAuthenticated && userType === 'motorista'" to="/motorista" class="button">Acessar Dashboard</RouterLink>
     </section>
 </template>
 
