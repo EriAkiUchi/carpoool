@@ -56,15 +56,21 @@ onMounted(() => {
 
 <style scoped>
 .dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 3rem;
+  /* margin: 0 auto;
+  padding: 2rem; */
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14.5rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #eee;
@@ -89,9 +95,12 @@ onMounted(() => {
 }
 
 .dashboard-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  
   gap: 2rem;
+  width: 100%;
 }
 
 .dashboard-card {
@@ -119,5 +128,11 @@ onMounted(() => {
 
 .card-button:hover {
   background-color: #264d73;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
 }
 </style>

@@ -109,11 +109,7 @@ nav a:hover {
   opacity: 0.8;
 }
 
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+/* main {} */
 
 footer {
   text-align: center;

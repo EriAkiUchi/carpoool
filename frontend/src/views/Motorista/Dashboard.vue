@@ -45,7 +45,7 @@ onMounted(() => {
                 <button class="card-button">Ver viagens</button>
             </section>
     
-            <section class="dasboard-card">
+            <section class="dashboard-card">
                 <h4>Meu Perfil</h4>
                 <p>Edite suas informações pessoais e preferências.</p>
                 <button class="card-button">Editar perfil</button>
@@ -56,15 +56,21 @@ onMounted(() => {
 
 <style scoped>
 .dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 3rem;
+  /* margin: 0 auto;
+  padding: 2rem; */
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14.5rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #eee;
@@ -89,13 +95,16 @@ onMounted(() => {
 }
 
 .dashboard-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: row;
+  
   gap: 2rem;
+  width: 100%;
 }
 
 .dashboard-card {
-  padding: 1.5rem;
+  flex: 1;
+  padding: 1rem;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -119,5 +128,11 @@ onMounted(() => {
 
 .card-button:hover {
   background-color: #264d73;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
 }
 </style>

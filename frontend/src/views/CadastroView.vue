@@ -31,10 +31,14 @@ import { RouterLink } from 'vue-router';
 
 <style scoped>
 .cadastro-container {
-  max-width: 500px;
+  max-width: 30rem;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
 }
 
 h2 {
