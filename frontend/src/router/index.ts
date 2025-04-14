@@ -53,6 +53,11 @@ const rotas: RouteRecordRaw[] = [
     meta: { requiresAuth: true, role: 'passageiro' }
   },
   {
+    path: '/passageiro/viagens',
+    name: 'passageiro-viagens',
+    component: () => import('../views/Passageiro/ViagensPassageiro.vue'),
+  },
+  {
     path: '/motorista',
     name: 'motorista-dashboard',
     component: () => import('../views/Motorista/Dashboard.vue'),

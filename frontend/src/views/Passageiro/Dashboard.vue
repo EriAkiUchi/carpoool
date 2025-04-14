@@ -42,7 +42,7 @@ onMounted(() => {
             <section class="dashboard-card">
                 <h4>Minhas Viagens</h4>
                 <p>Visualize e gerencie suas viagens agendadas.</p>
-                <button class="card-button">Ver viagens</button>
+                <RouterLink to="/passageiro/viagens" class="card-button">Ver viagens</RouterLink>
             </section>
     
             <section class="dashboard-card">
@@ -120,11 +120,15 @@ onMounted(() => {
   color: #336699;
 }
 
+.dashboard-card p {
+  margin-bottom: 1rem;
+}
+
 .card-button {
-  margin-top: 1rem;
   padding: 0.5rem 1rem;
   background-color: #336699;
   color: white;
+
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -138,6 +142,7 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .dashboard-content {
     flex-direction: column;
+    width: 40%;
   }
 }
 </style>

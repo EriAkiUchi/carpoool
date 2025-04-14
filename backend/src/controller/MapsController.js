@@ -277,6 +277,37 @@ class MapsController {
         }
     }
 
+    static async getRotasUsuarioId(req, res, firestore) {
+        try {
+            const { userType, id } = req.params;
+            const tipoID = userType === 'motorista' ? 'motoristaId' : 'passageirosIds';
+            const rotasRef = await firestore.collection('rotas');
+
+            //Buscar rotas onde o id do usuário está incluído
+            if(userType === 'motorista') {
+                const rotasSnapshot = await rotasRef.where(tipoID, '==', id).get();
+                if (rotasSnapshot.empty) {
+                    return res.status(404).json({ message: 'Nenhuma rota encontrada para o motorista' });
+                }
+            }
+            else if(userType === 'passageiro') {
+                const rotasSnapshot = await rotasRef.where(tipoID, 'array-contains', id).get();
+                if (rotasSnapshot.empty) {
+                    return res.status(404).json({ message: 'Nenhuma rota encontrada para o passageiro' });
+                }                
+            }
+            // Se houver rotas, mapeia os documentos para o formato desejado
+            // Convertendo os documentos do Firestore para objetos MapaDeRota
+            const rotas = rotasSnapshot.docs.map(doc => {
+                const rota = MapaDeRota.fromFirestore(doc);
+                return { id: doc.id, ...rota };
+            });
+            res.status(200).json(rotas);
+        } catch (erro) {
+            res.status(500).json({ message: 'Erro ao buscar rotas: ' + erro });
+        }
+    }
+
     /**
      * @swagger
      * /maps/rota:
