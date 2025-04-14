@@ -99,14 +99,19 @@ onMounted(() => {
   flex-direction: row;
   
   gap: 2rem;
-  width: 100%;
+  width: 70%;
 }
 
 .dashboard-card {
   flex: 1;
   padding: 1rem;
-  background-color: #f9f9f9;
+  /* background-color: #f9f9f9; */
+
   border-radius: 8px;
+  border-color: #336699;
+  border-style: solid;
+  border-width: 5px;
+
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
