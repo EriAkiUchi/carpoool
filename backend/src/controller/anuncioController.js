@@ -181,7 +181,7 @@ class AnuncioController {
                     ...enderecoDestino
                 };
             }
-    
+
             // Atualize somente o que foi definido
             await docRef.update(updatedFields);
             res.status(200).json({ message: 'anuncio atualizado com sucesso!', id, ...updatedFields });
