@@ -1,35 +1,35 @@
-import Anuncio from '../models/Anuncio.js';
+import Viagem from '../models/Viagem.js';
 
-class AnuncioController {
+class ViagemController {
     /**
      * @swagger
-     * /anuncios:
+     * /viagens:
      *   get:
-     *     summary: Retorna todos os anúncios
+     *     summary: Retorna todos os viagens
      *     responses:
      *       200:
-     *         description: Lista de anúncios
+     *         description: Lista de viagens
      *       500:
-     *         description: Erro em pegar os anúncios
+     *         description: Erro em pegar os viagens
      */
-    static async getAnuncios(req, res, firestore) {
+    static async getViagens(req, res, firestore) {
         try {
-            const snapshot = await firestore.collection('anuncios').get();
+            const snapshot = await firestore.collection('viagens').get();
 
             // Convertendo os documentos do Firestore para objetos Anuncio
-            const anuncios = snapshot.docs.map(doc => Anuncio.fromFirestore(doc));
-            res.status(200).json(anuncios);
+            const viagens = snapshot.docs.map(doc => Viagem.fromFirestore(doc));
+            res.status(200).json(viagens);
 
         } catch (erro) {
-            res.status(500).json({ message: 'erro em pegar os anuncios: ' + erro });
+            res.status(500).json({ message: 'erro em pegar as viagens: ' + erro });
         }
     }
 
     /**
      * @swagger
-     * /anuncios/{id}:
+     * /viagens/{id}:
      *   get:
-     *     summary: Retorna um anúncio pelo ID
+     *     summary: Retorna um viagem pelo ID
      *     parameters:
      *       - in: path
      *         name: id
@@ -38,36 +38,36 @@ class AnuncioController {
      *           type: string
      *     responses:
      *       200:
-     *         description: Anúncio encontrado
+     *         description: Viagem encontrada
      *       404:
-     *         description: Anúncio não encontrado
+     *         description: Viagem não encontrada
      *       500:
-     *         description: Erro em pegar o anúncio
+     *         description: Erro em pegar o viagem
      */
     static async getAnuncioId(req, res, firestore) {
         try {
             const { id } = req.params;
-            const doc = await firestore.collection('anuncios').doc(id).get();
+            const doc = await firestore.collection('viagens').doc(id).get();
             
             if(!doc.exists){
-                return res.status(404).json({ message: 'Anuncio não encontrado' });
+                return res.status(404).json({ message: 'Viagem não encontrada' });
             }
 
             // Convertendo o documento do Firestore para um objeto Anuncio
-            const anuncio = Anuncio.fromFirestore(doc); 
+            const viagem = Viagem.fromFirestore(doc); 
 
-            res.status(200).json(anuncio);
+            res.status(200).json(viagem);
 
         } catch (erro) {
-            res.status(500).json({ message: 'erro em pegar o anuncio: ' + erro });
+            res.status(500).json({ message: 'erro em pegar a viagem: ' + erro });
         }
     }
 
     /**
      * @swagger
-     * /anuncios:
+     * /viagens:
      *   post:
-     *     summary: Cria um novo anúncio
+     *     summary: Cria uma nova viagem
      *     requestBody:
      *       required: true
      *       content:
@@ -94,29 +94,29 @@ class AnuncioController {
      *                 type: string
      *     responses:
      *       201:
-     *         description: Anúncio criado com sucesso
+     *         description: Viagem criada com sucesso
      *       500:
-     *         description: Erro em criar o anúncio
+     *         description: Erro em criar a viagem
      */
-    static async createAnuncio(req, res, firestore) {
+    static async createViagem(req, res, firestore) {
         try {
-            const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
-            const anuncio = new Anuncio(nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida);
+            const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem } = req.body;
+            const viagem = new Viagem(nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem);
 
             // Salvando o anuncio no Firestore
-            const docRef = await firestore.collection('anuncios').add(anuncio.toFirestore());
-            res.status(201).json({ message: 'anuncio criado com sucesso!', id: docRef.id, ...anuncio });
+            const docRef = await firestore.collection('viagens').add(viagem.toFirestore());
+            res.status(201).json({ message: 'viagem criada com sucesso!', id: docRef.id, ...viagem });
             
         } catch (erro) {
-            res.status(500).json({ message: 'erro em criar o anuncio: ' + erro });
+            res.status(500).json({ message: 'erro em criar a viagem: ' + erro });
         }
     }
 
     /**
      * @swagger
-     * /anuncios/{id}:
+     * /viagens/{id}:
      *   put:
-     *     summary: Atualiza um anúncio pelo ID
+     *     summary: Atualiza uma viagem pelo ID
      *     parameters:
      *       - in: path
      *         name: id
@@ -149,20 +149,20 @@ class AnuncioController {
      *                 type: string
      *     responses:
      *       200:
-     *         description: Anúncio atualizado com sucesso
+     *         description: Viagem atualizada com sucesso
      *       404:
-     *         description: Anúncio não encontrado
+     *         description: Viagem não encontrada
      *       500:
-     *         description: Erro em atualizar o anúncio
+     *         description: Erro em atualizar a viagem
      */
-    static async updateAnuncio(req, res, firestore) {
+    static async updateViagem(req, res, firestore) {
         try {
             const { id } = req.params;
-            const docRef = firestore.collection('anuncios').doc(id); // Referência para o documento do anuncio
+            const docRef = firestore.collection('viagens').doc(id); // Referência para o documento da viagem
             const docSnap = await docRef.get(); // Busca o documento no Firestore
     
             if (!docSnap.exists) {
-                return res.status(404).json({ message: 'Anuncio não encontrado' });
+                return res.status(404).json({ message: 'Viagem não encontrada' });
             }
     
             const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
@@ -184,18 +184,18 @@ class AnuncioController {
 
             // Atualize somente o que foi definido
             await docRef.update(updatedFields);
-            res.status(200).json({ message: 'anuncio atualizado com sucesso!', id, ...updatedFields });
+            res.status(200).json({ message: 'viagem atualizada com sucesso!', id, ...updatedFields });
 
         } catch (erro) {
-            res.status(500).json({ message: 'erro em atualizar o anuncio: ' + erro });
+            res.status(500).json({ message: 'erro em atualizar a viagem: ' + erro });
         }
     }
 
     /**
      * @swagger
-     * /anuncios/{id}:
+     * /viagens/{id}:
      *   delete:
-     *     summary: Deleta um anúncio pelo ID
+     *     summary: Deleta uma viagem pelo ID
      *     parameters:
      *       - in: path
      *         name: id
@@ -204,30 +204,30 @@ class AnuncioController {
      *           type: string
      *     responses:
      *       200:
-     *         description: Anúncio deletado com sucesso
+     *         description: Viagem deletada com sucesso
      *       404:
-     *         description: Anúncio não encontrado
+     *         description: Viagem não encontrada
      *       500:
-     *         description: Erro em deletar o anúncio
+     *         description: Erro em deletar a viagem
      */
-    static async deleteAnuncio(req, res, firestore) {
+    static async deleteViagem(req, res, firestore) {
         try {
             const { id } = req.params;
-            const docRef = firestore.collection('anuncios').doc(id);
+            const docRef = firestore.collection('viagens').doc(id);
             const docSnap = await docRef.get();
 
             if (!docSnap.exists) {
-                return res.status(404).json({ message: 'Anuncio não encontrado' });
+                return res.status(404).json({ message: 'Viagem não encontrada' });
             }
 
             // Deletando o anuncio
             await docRef.delete();
-            res.status(200).json({ message: 'anuncio deletado com sucesso!', id });
+            res.status(200).json({ message: 'Viagem deletada com sucesso!', id });
             
         } catch (erro) {
-            res.status(500).json({ message: 'erro em deletar o anuncio: ' + erro });
+            res.status(500).json({ message: 'erro em deletar a viagem: ' + erro });
         }
     }
 }
 
-export default AnuncioController;
+export default ViagemController;
