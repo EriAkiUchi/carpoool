@@ -24,69 +24,6 @@ async function geocodeAddress(address) {
     }
 }
 
-class MapsController {
-
-    /**
-     * @swagger
-     * /maps/distancia/{passageiroId}:
-     *   get:
-     *    summary: Calcula o motorista mais próximo de um passageiro
-     *    parameters:
-     *     - in: path
-     *       name: passageiroId
-     *       required: true
-     *       schema:
-     *        type: string
-     *    responses:
-     *      200:
-     *        description: Motorista mais próximo encontrado
-     *      404:
-     *        description: Passageiro não encontrado
-     *      500:
-     *        description: Erro em calcular o motorista mais próximo
-     */
-
-    static async calcularMotoristaMaixProximo(req, res, firestore) {
-        try {
-            const { passageiroId } = req.params;
-            const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
-            if(!passageiroDoc.exists) {
-                return res.status(404).json({ message: 'Passageiro não encontrado' });                
-            }
-
-            const passageiro = passageiroDoc.data();
-            const coordenadasPassageiro = `${passageiro.coordenadasOrigem.lat},${passageiro.coordenadasOrigem.lng}`;
-
-            const motoristasSnapshot = await firestore.collection('motoristas').get();
-            const motoristas = [];
-            motoristasSnapshot.forEach(doc => {
-                const motorista = doc.data();
-                motorista.id = doc.id;
-                motoristas.push(motorista);
-            });
-
-            let motoristaMaisProximo = null;
-            let menorDistancia = Infinity;
-
-            //TODO: verificar se passageiro e motorista possuem o mesmo destino final
-            for (const motorista of motoristas) {
-                const coordenadasMotorista = `${motorista.coordenadasOrigem.lat},${motorista.coordenadasOrigem.lng}`;
-                const distanciaData = await calcularDistancia(coordenadasMotorista, coordenadasPassageiro);
-                const distancia = distanciaData.rows[0].elements[0].distance.value;
-                
-                if(distancia < menorDistancia) {
-                    menorDistancia = distancia;
-                    motoristaMaisProximo = motorista;
-                }
-            }
-
-            res.status(200).json({ motoristaMaisProximo, distancia: menorDistancia })
-
-        } catch (erro) {
-            res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });
-        }
-    }
-
     /**
      * @swagger
      * /maps/rota/calcular-viagem:
@@ -114,9 +51,8 @@ class MapsController {
      *         description: Erro em calcular a rota da viagem
      */
 
-    static async calcularRotaViagem(req, res, firestore, callOrigin = null) {
+    async function calcularRotaViagem(destinoComum, motoristaId, passageirosIds, firestore) {
         try {
-            const { motoristaId, passageirosIds, destinoComum } = req.body;
 
             // Validar que passageirosIds é um array e tem entre 1 e 3 passageiros
             if (!Array.isArray(passageirosIds) || passageirosIds.length < 1 || passageirosIds.length > 3) {
@@ -213,29 +149,116 @@ class MapsController {
             const rotaFinalData = await calcularRota(pontoAtual, destinoComumString);
             const rotaFinal = rotaFinalData.routes[0];
             
-            const rotaViagem = new MapaDeRota(motoristaId, passageirosIds, destinoComum, rotasParaPassageiros, rotaFinal, new Date(), 'em andamento');
+            const rotaViagem = new MapaDeRota(rotasParaPassageiros, rotaFinal);
 
             const rotaRef = await firestore.collection('rotas').add(rotaViagem.toFirestore());
-
-            if(callOrigin === 'updateRotaViagem'){
-                res.status(200).json({ 
-                    id: rotaRef.id,
-                    message: 'Rota atualiada com sucesso!',
-                    modoDeAtualizacao: 'recalcular rota',
-                    rotas: rotasParaPassageiros,
-                    rotaFinal 
-                });
-            }    
-            else {
-                res.status(200).json({ 
-                    id: rotaRef.id,
-                    rotas: rotasParaPassageiros,
-                    rotaFinal 
-                });
+            const novaRota = {
+                id: rotaRef.id,
+                rotas: rotasParaPassageiros,
+                rotaFinal: rotaFinal
             }
+            return novaRota;
+            // if(callOrigin === 'updateRotaViagem'){
+            //     res.status(200).json({ 
+            //         id: rotaRef.id,
+            //         message: 'Rota atualiada com sucesso!',
+            //         modoDeAtualizacao: 'recalcular rota',
+            //         rotas: rotasParaPassageiros,
+            //         rotaFinal 
+            //     });
+            // }    
+            // else {
+            //     res.status(200).json({ 
+            //         id: rotaRef.id,
+            //         rotas: rotasParaPassageiros,
+            //         rotaFinal 
+            //     });
+            // }
 
         } catch (erro) {
-            res.status(500).json({ message: 'erro em calcular a rota da viagem: ' + erro });
+            throw new Error('erro em calcular a rota da viagem: ' + erro);
+        }
+    }
+
+    async function deleteRotaViagem(id, firestore) {
+        try {
+            const { id } = req.params;
+            const docRef = firestore.collection('rotas').doc(id);
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Rota não encontrada' });
+            }
+
+            await firestore.collection('rotas').doc(id).delete();
+            
+            return { message: 'Rota deletada por falta de passageiros', id };
+            
+
+        } catch (erro) {
+            throw new Error('erro em deletar a Rota: '+ erro);
+        }
+    }
+
+class MapsController {
+
+    /**
+     * @swagger
+     * /maps/distancia/{passageiroId}:
+     *   get:
+     *    summary: Calcula o motorista mais próximo de um passageiro
+     *    parameters:
+     *     - in: path
+     *       name: passageiroId
+     *       required: true
+     *       schema:
+     *        type: string
+     *    responses:
+     *      200:
+     *        description: Motorista mais próximo encontrado
+     *      404:
+     *        description: Passageiro não encontrado
+     *      500:
+     *        description: Erro em calcular o motorista mais próximo
+     */
+
+    static async calcularMotoristaMaixProximo(req, res, firestore) {
+        try {
+            const { passageiroId } = req.params;
+            const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
+            if(!passageiroDoc.exists) {
+                return res.status(404).json({ message: 'Passageiro não encontrado' });                
+            }
+
+            const passageiro = passageiroDoc.data();
+            const coordenadasPassageiro = `${passageiro.coordenadasOrigem.lat},${passageiro.coordenadasOrigem.lng}`;
+
+            const motoristasSnapshot = await firestore.collection('motoristas').get();
+            const motoristas = [];
+            motoristasSnapshot.forEach(doc => {
+                const motorista = doc.data();
+                motorista.id = doc.id;
+                motoristas.push(motorista);
+            });
+
+            let motoristaMaisProximo = null;
+            let menorDistancia = Infinity;
+
+            for (const motorista of motoristas) {
+                const coordenadasMotorista = `${motorista.coordenadasOrigem.lat},${motorista.coordenadasOrigem.lng}`;
+                const distanciaData = await calcularDistancia(coordenadasMotorista, coordenadasPassageiro);
+                const distancia = distanciaData.rows[0].elements[0].distance.value;
+                
+                if(distancia < menorDistancia) {
+                    menorDistancia = distancia;
+                    motoristaMaisProximo = motorista;
+                }
+            }
+
+            res.status(200).json({ motoristaMaisProximo, distancia: menorDistancia })
+
+        } catch (erro) {
+            res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });
         }
     }
 
@@ -370,111 +393,90 @@ class MapsController {
         }
     }
 
-    static async updateRotaViagem(req, res, firestore) {
+    static async updateRotaViagem(parametros, firestore) {
         try {
-            const { id } = req.params;
+            const id = parametros.id;
+            const passageirosIds = parametros.passageirosIds;
+            const motoristaId = parametros.motoristaId;
+            const destinoComum = parametros.destinoComum;
+            const status = parametros.status;
             const docRef = firestore.collection('rotas').doc(id);
             const doc = await docRef.get();
 
             if (!doc.exists) {
-                return res.status(404).json({ message: 'Rota não encontrada' });
+                return { message: 'Rota não encontrada' };
             }
 
-            const { motoristaId, passageirosIds, status } = req.body;
+            // const { motoristaId, passageirosIds, status } = req.body;
             const existingData = doc.data();
 
-            if(passageirosIds === undefined) {
+            if(passageirosIds === undefined && status) {
                 await docRef.update({ status });
-                return res.status(200).json({ message: 'Status atualizado com sucesso' });
+                return { message: 'Status atualizado com sucesso' };
             }
             //se não há mais passageiros na viagem, deleta a rota
             else if(passageirosIds.length === 0) { 
-                res = this.deleteRotaViagem(req, res, firestore);
+                res = deleteRotaViagem(id, firestore);
                 return res;
             }
-            //um dos passageiros cancelou a viagem
-            else if(passageirosIds.length < existingData.passageirosIds.length){
-                const passageirosIdsExistentes = existingData.passageirosIds.filter(passageiroId => passageirosIds.includes(passageiroId));
-                const motoristaId = existingData.motoristaId;
-                const destinoComum = existingData.destinoComum;
+            else {
+                const novaRota = await calcularRotaViagem(destinoComum, motoristaId, passageirosIds, firestore);
+                return novaRota.id;
+            }
+            // //um dos passageiros cancelou a viagem
+            // else if(passageirosIds.length < existingData.passageirosIds.length){
+            //     const passageirosIdsExistentes = existingData.passageirosIds.filter(passageiroId => passageirosIds.includes(passageiroId));
+            //     const motoristaId = existingData.motoristaId;
+            //     const destinoComum = existingData.destinoComum;
 
-                req.body = {
-                    motoristaId,
-                    passageirosIds: passageirosIdsExistentes,
-                    destinoComum,
-                }
+            //     req.body = {
+            //         motoristaId,
+            //         passageirosIds: passageirosIdsExistentes,
+            //         destinoComum,
+            //     }
                 
-                res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
-                await firestore.collection('rotas').doc(id).delete();
-                return res;
-            }
-            // se há mais de 3 passageiros, retorna erro
-            else if(passageirosIds.length > 3){
-                return res.status(400).json({ message: 'Forneça menos de 3 passageiros' });
-            } 
+            //     res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
+            //     await firestore.collection('rotas').doc(id).delete();
+            //     return res;
+            // }
             // se foi adicionado passageiro na viagem
-            else if(passageirosIds.length > existingData.passageirosIds.length) {
+            // else if(passageirosIds.length > existingData.passageirosIds.length) {
 
-                const motoristaId = existingData.motoristaId;
-                const destinoComum = existingData.destinoComum;
+            //     const motoristaId = existingData.motoristaId;
+            //     const destinoComum = existingData.destinoComum;
 
-                req.body = {
-                    motoristaId,
-                    passageirosIds,
-                    destinoComum,
-                }
-                res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
-                await firestore.collection('rotas').doc(id).delete();
-                return res;
-            }
-            else if(passageirosIds.length === existingData.passageirosIds.length) {
-                const updatedFields = {}
+            //     req.body = {
+            //         motoristaId,
+            //         passageirosIds,
+            //         destinoComum,
+            //     }
+            //     res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
+            //     await firestore.collection('rotas').doc(id).delete();
+            //     return res;
+            // }
+            // else if(passageirosIds.length === existingData.passageirosIds.length) {
+            //     const updatedFields = {}
     
-                if (motoristaId) updatedFields.motoristaId = motoristaId;
-                if (passageirosIds) updatedFields.passageirosIds = passageirosIds;
-                if (status) updatedFields.status = status;
+            //     if (motoristaId) updatedFields.motoristaId = motoristaId;
+            //     if (passageirosIds) updatedFields.passageirosIds = passageirosIds;
+            //     if (status) updatedFields.status = status;
     
-                if (rotaFinal) {
-                    updatedFields.rotaFinal = {
-                        ...(existingData.rotaFinal || {}),
-                        ...rotaFinal,
-                    };
-                }
+            //     if (rotaFinal) {
+            //         updatedFields.rotaFinal = {
+            //             ...(existingData.rotaFinal || {}),
+            //             ...rotaFinal,
+            //         };
+            //     }
                 
-                await docRef.update(updatedFields);
-                res.status(200).json({ message: 'Rota atualizada com sucesso' });
-            }
+            //     await docRef.update(updatedFields);
+            //     res.status(200).json({ message: 'Rota atualizada com sucesso' });
+            // }
 
         } catch (erro) {
-            res.status(500).json({ message: 'Erro ao atualizar rota: ' + erro });
+            throw new Error('Erro ao atualizar a rota:' + erro);
         }
     }
 
-    static async deleteRotaViagem(req, res, firestore, callOrigin = null) {
-        try {
-            const { id } = req.params;
-            const docRef = firestore.collection('rotas').doc(id);
-            const docSnap = await docRef.get();
-
-            if (!docSnap.exists) {
-                return res.status(404).json({ message: 'Rota não encontrada' });
-            }
-
-            await firestore.collection('rotas').doc(id).delete();
-            if(callOrigin === 'updateRotaViagem'){
-                res.status(200).json({ 
-                    message: 'Rota atualizada com sucesso!',
-                    modoDeAtualizacao: 'deletar rota e a viagem',
-                    id 
-                });
-            } else {
-                res.status(200).json({ message: 'Rota deletada com sucesso!', id });
-            }
-
-        } catch (erro) {
-            res.status(500).json({ message: 'erro em deletar a Rota: ' + erro });
-        }
-    }
 }
 
 export default MapsController;

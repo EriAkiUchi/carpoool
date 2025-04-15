@@ -2,14 +2,16 @@ import MapsController from "../controller/MapsController.js";
 import admin from 'firebase-admin';
 
 class Viagem {
-    constructor(nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem = null) {
-        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida) {
-            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida})) {
+    constructor(motoristaId, passageirosIds = [], nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, status, rotaDeViagem = null) {
+        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId || !status) {
+            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId})) {
                 if(!value) {
                     throw new Error(`O campo ${key} é obrigatório`);
                 }
             }
         }
+        this.motoristaId = motoristaId;
+        this.passageirosIds = passageirosIds;
         this.nomeEmpresa = nomeEmpresa;
         this.enderecoDestino = {
             logradouro: enderecoDestino.logradouro,
@@ -19,6 +21,7 @@ class Viagem {
         };
         this.vagasRestantes = vagasRestantes;
         this.horarioDeSaida = this.processarHorarioDeSaida(horarioDeSaida); // Converte para o formato Date do Firestore
+        this.status = status;
         this.rotaDeViagem = rotaDeViagem; // id de uma rota de viagem ou null
     }
 
@@ -39,6 +42,8 @@ class Viagem {
     // para garantir que o objeto seja salvo corretamente no Firestore
     toFirestore() {
         return {
+            motoristaId: this.motoristaId,
+            passageirosIds: this.passageirosIds,
             nomeEmpresa: this.nomeEmpresa,
             enderecoDestino: {
                 logradouro: this.enderecoDestino.logradouro,
@@ -48,6 +53,7 @@ class Viagem {
             },
             vagasRestantes: this.vagasRestantes,
             horarioDeSaida: this.horarioDeSaida,
+            status: this.status,
             rotaDeViagem: this.rotaDeViagem, // id de uma rota de viagem ou null
         };
     }
@@ -58,6 +64,8 @@ class Viagem {
         const data = snapshot.data();
         return {
             id: snapshot.id,
+            motoristaId: data.motoristaId,
+            passageirosIds: data.passageirosIds,
             nomeEmpresa: data.nomeEmpresa,
             enderecoDestino: {
                 logradouro: data.enderecoDestino.logradouro,
@@ -67,6 +75,7 @@ class Viagem {
             },
             vagasRestantes: data.vagasRestantes,
             horarioDeSaida: data.horarioDeSaida,
+            status: data.status,
             rotaDeViagem: data.rotaDeViagem, // id de uma rota de viagem ou null
         }
     }

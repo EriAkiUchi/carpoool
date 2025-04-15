@@ -1,4 +1,5 @@
 import Viagem from '../models/Viagem.js';
+import MapsController from './MapsController.js';
 
 class ViagemController {
     /**
@@ -16,7 +17,7 @@ class ViagemController {
         try {
             const snapshot = await firestore.collection('viagens').get();
 
-            // Convertendo os documentos do Firestore para objetos Anuncio
+            // Convertendo os documentos do Firestore para objetos Viagem
             const viagens = snapshot.docs.map(doc => Viagem.fromFirestore(doc));
             res.status(200).json(viagens);
 
@@ -42,9 +43,9 @@ class ViagemController {
      *       404:
      *         description: Viagem não encontrada
      *       500:
-     *         description: Erro em pegar o viagem
+     *         description: Erro em pegar a viagem
      */
-    static async getAnuncioId(req, res, firestore) {
+    static async getViagemId(req, res, firestore) {
         try {
             const { id } = req.params;
             const doc = await firestore.collection('viagens').doc(id).get();
@@ -53,7 +54,7 @@ class ViagemController {
                 return res.status(404).json({ message: 'Viagem não encontrada' });
             }
 
-            // Convertendo o documento do Firestore para um objeto Anuncio
+            // Convertendo o documento do Firestore para um objeto Viagem
             const viagem = Viagem.fromFirestore(doc); 
 
             res.status(200).json(viagem);
@@ -100,10 +101,10 @@ class ViagemController {
      */
     static async createViagem(req, res, firestore) {
         try {
-            const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem } = req.body;
-            const viagem = new Viagem(nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem);
+            const { motoristaId, passageirosIds, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem } = req.body;
+            const viagem = new Viagem(motoristaId, passageirosIds, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem);
 
-            // Salvando o anuncio no Firestore
+            // Salvando a viagem no Firestore
             const docRef = await firestore.collection('viagens').add(viagem.toFirestore());
             res.status(201).json({ message: 'viagem criada com sucesso!', id: docRef.id, ...viagem });
             
@@ -165,7 +166,7 @@ class ViagemController {
                 return res.status(404).json({ message: 'Viagem não encontrada' });
             }
     
-            const { nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
+            const { nomeEmpresa, vagasRestantes, horarioDeSaida, passageirosIds, status } = req.body;
             const existingData = docSnap.data();
     
             // Crie um objeto apenas com os campos enviados
@@ -174,12 +175,24 @@ class ViagemController {
             if (nomeEmpresa) updatedFields.nomeEmpresa = nomeEmpresa;
             if (vagasRestantes) updatedFields.vagasRestantes = vagasRestantes;
             if (horarioDeSaida) updatedFields.horarioDeSaida = horarioDeSaida;
-                
-            if (enderecoDestino) {
-                updatedFields.enderecoDestino = {
-                    ...(existingData.enderecoDestino || {}),
-                    ...enderecoDestino
-                };
+            if (status) updatedFields.status = status;
+
+            if (passageirosIds) { //atualizar ids dos passageiros e a rota
+                const listaAtualizadaPassageiros = existingData.passageirosIds.filter(passageiro => passageirosIds.includes(passageiro));
+                updatedFields.passageirosIds = [...listaAtualizadaPassageiros];
+
+                if (updatedFields.passageirosIds.length > existingData.vagasRestantes){
+                    res.status(400).json({ message: 'Quantidade inválida de passageiros. Há mais passageiros que permitido' });
+                }
+                const parametros = {
+                    motoristaId: existingData.motoristaId,
+                    passageirosIds: updatedFields.passageirosIds,
+                    status: status || existingData.status,
+                    destinoComum: {...existingData.enderecoDestino},
+                    id: existingData.rotaDeViagem
+                }
+                const idNovaRota = await MapsController.updateRotaViagem(parametros, firestore);
+                updatedFields.rotaDeViagem = idNovaRota;
             }
 
             // Atualize somente o que foi definido
@@ -220,7 +233,7 @@ class ViagemController {
                 return res.status(404).json({ message: 'Viagem não encontrada' });
             }
 
-            // Deletando o anuncio
+            // Deletando a viagem
             await docRef.delete();
             res.status(200).json({ message: 'Viagem deletada com sucesso!', id });
             
