@@ -2,8 +2,8 @@ import MapsController from "../controller/MapsController.js";
 import admin from 'firebase-admin';
 
 class Viagem {
-    constructor(motoristaId, passageirosIds = [], nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, status, rotaDeViagem = null) {
-        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId || !status) {
+    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida,  passageirosIds = null, status = 'em andamento', rotaDeViagem = null) {
+        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId) {
             for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId})) {
                 if(!value) {
                     throw new Error(`O campo ${key} é obrigatório`);
