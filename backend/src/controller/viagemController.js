@@ -1,5 +1,6 @@
 import Viagem from '../models/Viagem.js';
 import MapsController from './MapsController.js';
+import { calcularRotaViagem } from './MapsController.js';
 
 class ViagemController {
     /**
@@ -101,8 +102,8 @@ class ViagemController {
      */
     static async createViagem(req, res, firestore) {
         try {
-            const { motoristaId, passageirosIds, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem } = req.body;
-            const viagem = new Viagem(motoristaId, passageirosIds, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, rotaDeViagem);
+            const { motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
+            const viagem = new Viagem(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida);
 
             // Salvando a viagem no Firestore
             const docRef = await firestore.collection('viagens').add(viagem.toFirestore());
@@ -166,20 +167,30 @@ class ViagemController {
                 return res.status(404).json({ message: 'Viagem não encontrada' });
             }
     
-            const { nomeEmpresa, vagasRestantes, horarioDeSaida, passageirosIds, status } = req.body;
+            const { horarioDeSaida, passageirosIds, status } = req.body;
             const existingData = docSnap.data();
     
             // Crie um objeto apenas com os campos enviados
             const updatedFields = {};
     
-            if (nomeEmpresa) updatedFields.nomeEmpresa = nomeEmpresa;
-            if (vagasRestantes) updatedFields.vagasRestantes = vagasRestantes;
+            // if (nomeEmpresa) updatedFields.nomeEmpresa = nomeEmpresa;
+            // if (vagasRestantes) updatedFields.vagasRestantes = vagasRestantes;
             if (horarioDeSaida) updatedFields.horarioDeSaida = horarioDeSaida;
             if (status) updatedFields.status = status;
 
-            if (passageirosIds) { //atualizar ids dos passageiros e a rota
-                const listaAtualizadaPassageiros = existingData.passageirosIds.filter(passageiro => passageirosIds.includes(passageiro));
-                updatedFields.passageirosIds = [...listaAtualizadaPassageiros];
+            //atualizar ids dos passageiros e a rota
+            if (passageirosIds && existingData.passageirosIds) { 
+                //alterar numero de vagas
+                if (passageirosIds.length > existingData.passageirosIds.length) {
+                    updatedFields.vagasRestantes = --existingData.vagasRestantes;
+                    updatedFields.passageirosIds = [...passageirosIds];
+                }
+                else {
+                    updatedFields.vagasRestantes = ++existingData.vagasRestantes;
+                    const listaAtualizadaPassageiros = existingData.passageirosIds.filter(passageiro => passageirosIds.includes(passageiro));
+                    updatedFields.passageirosIds = [...listaAtualizadaPassageiros];
+                }
+                
 
                 if (updatedFields.passageirosIds.length > existingData.vagasRestantes){
                     res.status(400).json({ message: 'Quantidade inválida de passageiros. Há mais passageiros que permitido' });
@@ -193,6 +204,13 @@ class ViagemController {
                 }
                 const idNovaRota = await MapsController.updateRotaViagem(parametros, firestore);
                 updatedFields.rotaDeViagem = idNovaRota;
+            } 
+            //Criar nova rota
+            else if (passageirosIds && !existingData.passageirosIds) {
+                updatedFields.vagasRestantes = --existingData.vagasRestantes;
+                updatedFields.passageirosIds = [...passageirosIds];
+                const idNovaRota = await calcularRotaViagem(existingData.enderecoDestino, existingData.motoristaId, passageirosIds, firestore);
+                updatedFields.rotaDeViagem = idNovaRota.id;
             }
 
             // Atualize somente o que foi definido
