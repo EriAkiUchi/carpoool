@@ -47,20 +47,33 @@ class ViagemController {
      */
     static async getViagemId(req, res, firestore) {
         try {
-            const { id } = req.params;
-            const doc = await firestore.collection('viagens').doc(id).get();
-            
-            if(!doc.exists){
-                return res.status(404).json({ message: 'Viagem não encontrada' });
+            const { userType, id } = req.params;
+            const tipoID = userType === 'motorista' ? 'motoristaId' : 'passageirosIds';
+            const viagensRef = await firestore.collection('viagens');
+            let viagensSnapshot;
+
+            //Buscar viagens onde o id do usuário está incluído
+            if(userType === 'motorista') {
+                viagensSnapshot = await viagensRef.where(tipoID, '==', id).get();
+                if (viagensSnapshot.empty) {
+                    return res.status(404).json({ message: 'Nenhuma viagem encontrada para o motorista' });
+                }
             }
-
-            // Convertendo o documento do Firestore para um objeto Viagem
-            const viagem = Viagem.fromFirestore(doc); 
-
-            res.status(200).json(viagem);
-
+            else if(userType === 'passageiro') {
+                viagensSnapshot = await viagensRef.where(tipoID, 'array-contains', id).get();
+                if (viagensSnapshot.empty) {
+                    return res.status(404).json({ message: 'Nenhuma viagem encontrada para o passageiro' });
+                }                
+            }
+            // Se houver viagens, mapeia os documentos para o formato desejado
+            // Convertendo os documentos do Firestore para objetos Viagem
+            const viagens = viagensSnapshot.docs.map(doc => {
+                const viagem = Viagem.fromFirestore(doc);
+                return { id: doc.id, ...viagem };
+            });
+            res.status(200).json(viagens);
         } catch (erro) {
-            res.status(500).json({ message: 'erro em pegar a viagem: ' + erro });
+            res.status(500).json({ message: 'Erro ao buscar viagens: ' + erro });
         }
     }
 
