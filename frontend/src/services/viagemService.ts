@@ -16,7 +16,7 @@ class ViagemService {
     //Obter rota filtrando pelo passageiro ou motorista
     async getByUsuarioId(userType: 'passageiro' | 'motorista', id: string) {
         try {
-            const resposta = await api.get(`maps/rotas/${userType}/${id}`, {
+            const resposta = await api.get(`viagens/${userType}/${id}`, {
                 params: {
                     userType,
                     id,

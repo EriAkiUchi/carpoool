@@ -32,7 +32,7 @@ const routes = (app, firestore) => {
     app.get('/passageiros/:id', async (req, res) => PassageiroController.getPassageiroId(req, res, req.app.locals.firestore));
     app.get('/motoristas/:id', async (req, res) => MotoristaController.getMotoristaId(req, res, req.app.locals.firestore));
     app.get('/carros/:id', async (req, res) => CarroController.getCarroId(req, res, req.app.locals.firestore));
-    app.get(`/viagens/:id`, async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
+    app.get(`/viagens/:userType/:id`, async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
 
     app.post('/passageiros', async (req, res) => PassageiroController.createPassageiro(req, res, req.app.locals.firestore));
     app.post('/motoristas', async (req, res) => MotoristaController.createMotorista(req, res, req.app.locals.firestore));
@@ -52,7 +52,7 @@ const routes = (app, firestore) => {
     app.delete(`/viagens/:id`, async (req, res) => ViagemController.deleteViagem(req, res, req.app.locals.firestore));
 
     app.get('/maps/distancia/:passageiroId', async (req, res) => MapsController.calcularMotoristaMaixProximo(req, res, req.app.locals.firestore));
-    app.get('/maps/rota/passageiro/:passageiroId', async (req, res) => MapsController.getRotasUsuarioId(req, res, req.app.locals.firestore));
+    // app.get('/maps/rota/passageiro/:passageiroId', async (req, res) => MapsController.getRotasUsuarioId(req, res, req.app.locals.firestore));
     // app.post('/maps/rota/calcular-viagem', async (req, res) => MapsController.calcularRotaViagem(req, res, req.app.locals.firestore, null));
     // app.put('/maps/rota/:id', async (req, res) => MapsController.updateRotaViagem(req, res, req.app.locals.firestore));
     // app.delete('/maps/rota/:id', async (req, res) => MapsController.deleteRotaViagem(req, res, req.app.locals.firestore, null));

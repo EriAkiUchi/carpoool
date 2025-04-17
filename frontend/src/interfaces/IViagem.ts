@@ -14,14 +14,10 @@ export default interface Viagem {
   id: string;
   motoristaId: string;
   motoristaNome?: string;
+  nomeEmpresa: string;
   passageirosIds: string[];
   destinoComum: Endereco;
-  rotas: Rota[];
-  rotaFinal: any;
-  dataCriacao: {
-    seconds: number;
-    nanoseconds: number;
-  };
+  rotas: string;
   status: string;
-  formattedDate?: string; // Para apresentação no front
+  horarioDeSaida: string;
 }
