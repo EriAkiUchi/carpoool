@@ -2,7 +2,7 @@ import MapsController from "../controller/MapsController.js";
 import admin from 'firebase-admin';
 
 class Viagem {
-    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida,  passageirosIds = null, status = 'em andamento', rotaDeViagem = null) {
+    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida,  passageirosIds = [], status = 'em andamento', rotaDeViagem = "") {
         if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId) {
             for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId})) {
                 if(!value) {

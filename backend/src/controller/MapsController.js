@@ -158,31 +158,38 @@ export async function calcularRotaViagem(destinoComum, motoristaId, passageirosI
             rotaFinal: rotaFinal
         }
         return novaRota;
-        // if(callOrigin === 'updateRotaViagem'){
-        //     res.status(200).json({ 
-        //         id: rotaRef.id,
-        //         message: 'Rota atualiada com sucesso!',
-        //         modoDeAtualizacao: 'recalcular rota',
-        //         rotas: rotasParaPassageiros,
-        //         rotaFinal 
-        //     });
-        // }    
-        // else {
-        //     res.status(200).json({ 
-        //         id: rotaRef.id,
-        //         rotas: rotasParaPassageiros,
-        //         rotaFinal 
-        //     });
-        // }
 
     } catch (erro) {
         throw new Error('erro em calcular a rota da viagem: ' + erro);
     }
 }
 
-async function deleteRotaViagem(idRota, firestore) {
+export async function updateRotaViagem(parametros, firestore) {
     try {
-        const { id } = idRota;
+        const id = parametros.id;
+        const passageirosIds = parametros.passageirosIds;
+        const motoristaId = parametros.motoristaId;
+        const destinoComum = parametros.destinoComum;
+        const docRef = firestore.collection('rotas').doc(id);
+        const doc = await docRef.get();
+
+        if (!doc.exists) {
+            return { message: 'Rota não encontrada' };
+        }
+        else {
+            const novaRota = await calcularRotaViagem(destinoComum, motoristaId, passageirosIds, firestore);
+            await firestore.collection('rotas').doc(id).delete();
+            return novaRota.id;
+        }            
+
+    } catch (erro) {
+        throw new Error('Erro ao atualizar a rota:' + erro);
+    }
+}
+
+export async function deleteRotaViagem(idRota, firestore) {
+    try {
+        const id = idRota;
         const docRef = firestore.collection('rotas').doc(id);
         const docSnap = await docRef.get();
 
@@ -393,90 +400,7 @@ class MapsController {
         }
     }
 
-    static async updateRotaViagem(parametros, firestore) {
-        try {
-            const id = parametros.id;
-            const passageirosIds = parametros.passageirosIds;
-            const motoristaId = parametros.motoristaId;
-            const destinoComum = parametros.destinoComum;
-            const status = parametros.status;
-            const docRef = firestore.collection('rotas').doc(id);
-            const doc = await docRef.get();
-
-            if (!doc.exists) {
-                return { message: 'Rota não encontrada' };
-            }
-
-            // const { motoristaId, passageirosIds, status } = req.body;
-            const existingData = doc.data();
-
-            if(passageirosIds === undefined && status) {
-                await docRef.update({ status });
-                return { message: 'Status atualizado com sucesso' };
-            }
-            //se não há mais passageiros na viagem, deleta a rota
-            else if(passageirosIds.length === 0) { 
-                res = deleteRotaViagem(id, firestore);
-                return res;
-            }
-            else {
-                const novaRota = await calcularRotaViagem(destinoComum, motoristaId, passageirosIds, firestore);
-                await firestore.collection('rotas').doc(id).delete();
-                return novaRota.id;
-            }
-            // //um dos passageiros cancelou a viagem
-            // else if(passageirosIds.length < existingData.passageirosIds.length){
-            //     const passageirosIdsExistentes = existingData.passageirosIds.filter(passageiroId => passageirosIds.includes(passageiroId));
-            //     const motoristaId = existingData.motoristaId;
-            //     const destinoComum = existingData.destinoComum;
-
-            //     req.body = {
-            //         motoristaId,
-            //         passageirosIds: passageirosIdsExistentes,
-            //         destinoComum,
-            //     }
-                
-            //     res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
-            //     await firestore.collection('rotas').doc(id).delete();
-            //     return res;
-            // }
-            // se foi adicionado passageiro na viagem
-            // else if(passageirosIds.length > existingData.passageirosIds.length) {
-
-            //     const motoristaId = existingData.motoristaId;
-            //     const destinoComum = existingData.destinoComum;
-
-            //     req.body = {
-            //         motoristaId,
-            //         passageirosIds,
-            //         destinoComum,
-            //     }
-            //     res = this.calcularRotaViagem(req, res, firestore, 'updateRotaViagem');
-            //     await firestore.collection('rotas').doc(id).delete();
-            //     return res;
-            // }
-            // else if(passageirosIds.length === existingData.passageirosIds.length) {
-            //     const updatedFields = {}
     
-            //     if (motoristaId) updatedFields.motoristaId = motoristaId;
-            //     if (passageirosIds) updatedFields.passageirosIds = passageirosIds;
-            //     if (status) updatedFields.status = status;
-    
-            //     if (rotaFinal) {
-            //         updatedFields.rotaFinal = {
-            //             ...(existingData.rotaFinal || {}),
-            //             ...rotaFinal,
-            //         };
-            //     }
-                
-            //     await docRef.update(updatedFields);
-            //     res.status(200).json({ message: 'Rota atualizada com sucesso' });
-            // }
-
-        } catch (erro) {
-            throw new Error('Erro ao atualizar a rota:' + erro);
-        }
-    }
 
 }
 

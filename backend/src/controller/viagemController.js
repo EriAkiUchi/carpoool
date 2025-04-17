@@ -1,6 +1,5 @@
 import Viagem from '../models/Viagem.js';
-import MapsController from './MapsController.js';
-import { calcularRotaViagem } from './MapsController.js';
+import { calcularRotaViagem, updateRotaViagem, deleteRotaViagem } from './MapsController.js';
 
 class ViagemController {
     /**
@@ -170,16 +169,30 @@ class ViagemController {
             const { horarioDeSaida, passageirosIds, status } = req.body;
             const existingData = docSnap.data();
     
+            if (existingData.status === 'finalizada' || existingData.status === 'cancelada') {
+                return res.status(400).json({ message: 'Viagem já finalizada ou cancelada' });
+            }
+
             // Crie um objeto apenas com os campos enviados
             const updatedFields = {};
-    
-            // if (nomeEmpresa) updatedFields.nomeEmpresa = nomeEmpresa;
-            // if (vagasRestantes) updatedFields.vagasRestantes = vagasRestantes;
+                
             if (horarioDeSaida) updatedFields.horarioDeSaida = horarioDeSaida;
             if (status) updatedFields.status = status;
 
+            //array vazio de passageirosIds
+            if (!passageirosIds) { 
+                updatedFields.passageirosIds = existingData.passageirosIds;
+            }
+            // todos os passageiros cancelaram a viagem
+            else if(passageirosIds.length === 0 && existingData.passageirosIds.length > 0) {
+                await firestore.collection('rotas').doc(existingData.rotaDeViagem).delete();
+                updatedFields.rotaDeViagem = "";
+                updatedFields.passageirosIds = [];
+                updatedFields.vagasRestantes = existingData.vagasRestantes + 1;
+            }
             //atualizar ids dos passageiros e a rota
-            if (passageirosIds && existingData.passageirosIds) { 
+            else if (passageirosIds && existingData.passageirosIds.length > 0) { 
+                
                 //alterar numero de vagas
                 if (passageirosIds.length > existingData.passageirosIds.length) {
                     updatedFields.vagasRestantes = --existingData.vagasRestantes;
@@ -191,10 +204,12 @@ class ViagemController {
                     updatedFields.passageirosIds = [...listaAtualizadaPassageiros];
                 }
                 
-
-                if (updatedFields.passageirosIds.length > existingData.vagasRestantes){
+                if (existingData.vagasRestantes < 0) {
+                    existingData.vagasRestantes = 0;
                     res.status(400).json({ message: 'Quantidade inválida de passageiros. Há mais passageiros que permitido' });
+                    return;
                 }
+
                 const parametros = {
                     motoristaId: existingData.motoristaId,
                     passageirosIds: updatedFields.passageirosIds,
@@ -202,11 +217,11 @@ class ViagemController {
                     destinoComum: {...existingData.enderecoDestino},
                     id: existingData.rotaDeViagem
                 }
-                const idNovaRota = await MapsController.updateRotaViagem(parametros, firestore);
+                const idNovaRota = await updateRotaViagem(parametros, firestore);
                 updatedFields.rotaDeViagem = idNovaRota;
             } 
             //Criar nova rota
-            else if (passageirosIds && !existingData.passageirosIds) {
+            else if (passageirosIds && existingData.passageirosIds.length === 0) {
                 updatedFields.vagasRestantes = --existingData.vagasRestantes;
                 updatedFields.passageirosIds = [...passageirosIds];
                 const idNovaRota = await calcularRotaViagem(existingData.enderecoDestino, existingData.motoristaId, passageirosIds, firestore);
