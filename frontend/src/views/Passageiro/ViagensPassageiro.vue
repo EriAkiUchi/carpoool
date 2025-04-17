@@ -13,33 +13,6 @@ const viagens = ref<Viagem[]>([]);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
-// Função para formatar a data de timestamp do Firestore
-function formatarData(timestamp: { seconds: number }) {
-  if (!timestamp) return 'Data não disponível';
-  const data = new Date(timestamp.seconds * 1000);
-  return data.toLocaleDateString('pt-BR');
-}
-
-// Função para formatar o endereço
-function formatarEndereco(endereco: any) {
-  if (!endereco) return 'Endereço não disponível';
-  return `${endereco.logradouro}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade}`;
-}
-
-// Função para formatar o status da viagem
-function formatarStatus(status: string) {
-  switch (status) {
-    case 'em andamento':
-      return 'Em andamento';
-    case 'finalizada':
-      return 'Finalizada';
-    case 'cancelada':
-      return 'Cancelada';
-    default:
-      return status || 'Não definido';
-  }
-}
-
 // Função para carregar viagens do passageiro
 async function carregarViagens() {
   if (!user.value?.id) return;
@@ -49,7 +22,7 @@ async function carregarViagens() {
     error.value = null;
     
     // Buscar viagens
-    const viagensData = await viagemService.getByUsuarioId('passageiro', user.value.id);
+    const viagensData: Viagem[] = await viagemService.getByUsuarioId('passageiro', user.value.id);
     
     if (Array.isArray(viagensData)) {
       // Processar cada viagem
@@ -69,10 +42,7 @@ async function carregarViagens() {
         
         viagensProcessadas.push({
           ...viagem,
-          motoristaNome,
-          formattedDate: formatarData(viagem.dataCriacao),
-          formattedStatus: formatarStatus(viagem.status),
-          formattedDestino: formatarEndereco(viagem.destinoComum)
+          motoristaNome,          
         });
       }
       
@@ -145,14 +115,14 @@ onMounted(async () => {
     <div v-else class="viagens-container">
       <div class="viagem-card" v-for="viagem in viagens" :key="viagem.id">
         <div class="viagem-header">
-          <h3>Viagem para {{ viagem.formattedDestino }}</h3>
+          <h3>Viagem para {{ viagem.nomeEmpresa }}</h3>
           <span class="viagem-status" :class="viagem.status">
-            {{ viagem.formattedStatus }}
+            {{ viagem.status }}
           </span>
         </div>
         
         <div class="viagem-info">
-          <p><strong>Data:</strong> {{ viagem.formattedDate }}</p>
+          <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
           <p><strong>Motorista:</strong> {{ viagem.motoristaNome }}</p>
         </div>
         
