@@ -52,17 +52,11 @@ async function geocodeAddress(address) {
      */
 
 export async function calcularRotaViagem(destinoComum, motoristaId, passageirosIds, firestore) {
-    try {
-
-        // Validar que passageirosIds é um array e tem entre 1 e 3 passageiros
-        if (!Array.isArray(passageirosIds) || passageirosIds.length < 1 || passageirosIds.length > 3) {
-            return res.status(400).json({ message: 'Forneça de 1 a 3 passageiros' });
-        }
-
+    try {        
         // Buscar dados do motorista
         const motoristaDoc = await firestore.collection('motoristas').doc(motoristaId).get();
         if (!motoristaDoc.exists) {
-            return res.status(404).json({ message: 'Motorista não encontrado' });
+            return { erro: 'Motorista não encontrado' };
         }
         const motorista = motoristaDoc.data();
 
@@ -70,7 +64,7 @@ export async function calcularRotaViagem(destinoComum, motoristaId, passageirosI
         for (const passageiroId of passageirosIds) {
             const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
             if(!passageiroDoc.exists) {
-                return res.status(404).json({ message: `Passageiro ${passageiroId} não encontrado` });
+                return { erro: `Passageiro ${passageiroId} não encontrado` };
             } 
             
             const passageiro = passageiroDoc.data();
@@ -194,7 +188,7 @@ export async function deleteRotaViagem(idRota, firestore) {
         const docSnap = await docRef.get();
 
         if (!docSnap.exists) {
-            return res.status(404).json({ message: 'Rota não encontrada' });
+            return { erro: 'Rota não encontrada' };
         }
 
         await firestore.collection('rotas').doc(id).delete();
