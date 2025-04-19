@@ -71,7 +71,7 @@ async function cancelarViagem(viagemId: string) {
 
   try {
     isLoading.value = true;
-    await viagemService.cancelarViagem(viagemId, user.value.id);
+    await viagemService.cancelarViagem(viagemId, user.value.id, user.value.tipo);
     // Recarregar viagens após cancelamento
     await carregarViagens();
   } catch (err) {
@@ -116,7 +116,10 @@ onMounted(async () => {
       <div class="viagem-card" v-for="viagem in viagens" :key="viagem.id">
         <div class="viagem-header">
           <h3>Viagem para {{ viagem.nomeEmpresa }}</h3>
-          <span class="viagem-status" :class="viagem.status">
+          <span v-if="viagem.status === 'em-andamento'" class="viagem-status" :class="viagem.status">
+            em andamento
+          </span>
+          <span v-else class="viagem-status" :class="viagem.status">
             {{ viagem.status }}
           </span>
         </div>
@@ -132,7 +135,7 @@ onMounted(async () => {
           </button>
           
           <button 
-            v-if="viagem.status === 'em andamento'"
+            v-if="viagem.status === 'em-andamento'"
             @click="cancelarViagem(viagem.id)" 
             class="btn-cancelar">
             Cancelar viagem
@@ -230,13 +233,14 @@ onMounted(async () => {
 }
 
 .viagem-info {
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #336699;
+  border-bottom: 1px solid #336699;
   padding: 0.75rem 0;
   margin: 0.75rem 0;
 }
 
 .viagem-info p {
+  color: #336699;
   margin: 0.5rem 0;
 }
 

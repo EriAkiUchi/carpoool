@@ -26,11 +26,29 @@ class ViagemController {
         }
     }
 
+    static async getViagemId(req, res, firestore) {
+        try {
+            const { id } = req.params;
+            const docRef = firestore.collection('viagens').doc(id);
+            const docSnap = await docRef.get();
+
+            if (!docSnap.exists) {
+                return res.status(404).json({ message: 'Viagem não encontrada' });
+            }
+
+            const viagem = Viagem.fromFirestore(docSnap);
+            res.status(200).json({ id: docSnap.id, ...viagem });
+
+        } catch (erro) {
+            res.status(500).json({ message: 'erro em pegar a viagem: ' + erro });
+        }
+    }
+
     /**
      * @swagger
      * /viagens/{id}:
      *   get:
-     *     summary: Retorna um viagem pelo ID
+     *     summary: Retorna uma lista de viagens pelo ID
      *     parameters:
      *       - in: path
      *         name: id
@@ -45,7 +63,7 @@ class ViagemController {
      *       500:
      *         description: Erro em pegar a viagem
      */
-    static async getViagemId(req, res, firestore) {
+    static async getViagensByUserId(req, res, firestore) {
         try {
             const { userType, id } = req.params;
             const tipoID = userType === 'motorista' ? 'motoristaId' : 'passageirosIds';

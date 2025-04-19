@@ -9,7 +9,7 @@ class ViagemService {
 
     //Obter rota pelo id
     async getById(id: string) {
-        const resposta = await api.get(`maps/rota/${id}`);
+        const resposta = await api.get(`viagens/${id}`);
         return resposta.data;
     }
 
@@ -29,20 +29,26 @@ class ViagemService {
         }
     }
     // Cancelar viagem
-    async cancelarViagem(rotaId: string, passageiroId: string) {
+    async cancelarViagem(viagemId: string, userId: string, userType: 'passageiro' | 'motorista') {
         try {
-            const rotaResponse = await this.getById(rotaId);
-            const rota = rotaResponse.data;
-
-            //Filtrar o passageiro da lista de passageiros
-            const passageirosAtualizados = rota.passageirosIds.filter((id: string) => {
-                id !== rota.passageirosIds.includes(passageiroId);
-            });
-
-            //Atualizar a rota sem o passageiro
-            return api.put(`maps/rota/${rotaId}`, {
-                passageirosIds: passageirosAtualizados,
-            });
+            const viagemResposta = await this.getById(viagemId);
+            
+            if(userType === 'passageiro') {
+                //Filtrar o passageiro da lista de passageiros
+                const passageirosAtualizados = viagemResposta.passageirosIds.filter((id: string) => {
+                    id !== viagemResposta.passageirosIds.includes(userId);
+                });
+    
+                //Atualizar a rota sem o passageiro
+                return api.put(`viagens/${viagemId}`, {
+                    passageirosIds: [...passageirosAtualizados],
+                });
+            } 
+            else { //motorista cancelou a viagem
+                return api.put(`viagens/${viagemId}`, {
+                    status: 'cancelada'
+                });
+            }
 
         } catch (error) {
             throw error;
