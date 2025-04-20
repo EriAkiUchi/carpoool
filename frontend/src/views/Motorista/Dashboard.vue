@@ -42,7 +42,7 @@ onMounted(() => {
             <section class="dashboard-card">
                 <h4>Minhas Caronas</h4>
                 <p>Gerencie as suas caronas.</p>
-                <button class="card-button">Ver viagens</button>
+                <RouterLink to="/motorista/viagens" class="card-button">Ver caronas</RouterLink>
             </section>
     
             <section class="dashboard-card">
@@ -97,14 +97,14 @@ onMounted(() => {
 .dashboard-content {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   
   gap: 2rem;
-  width: 70%;
+  width: 100%;
 }
 
 .dashboard-card {
-  flex: 1;
-  padding: 1rem;
+  padding: 1.5rem;
   /* background-color: #f9f9f9; */
 
   border-radius: 8px;
@@ -120,11 +120,15 @@ onMounted(() => {
   color: #336699;
 }
 
+.dashboard-card p {
+  margin-bottom: 1rem;
+}
+
 .card-button {
-  margin-top: 1rem;
   padding: 0.5rem 1rem;
   background-color: #336699;
   color: white;
+
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -138,6 +142,7 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .dashboard-content {
     flex-direction: column;
+    width: 40%;
   }
 }
 </style>

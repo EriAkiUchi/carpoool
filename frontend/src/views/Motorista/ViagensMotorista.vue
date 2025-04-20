@@ -13,89 +13,80 @@ const viagens = ref<Viagem[]>([]);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
-// Função para carregar viagens do passageiro
+// Função para carregar viagens do motorista
 async function carregarViagens() {
-  if (!user.value?.id) return;
+    if (!user.value?.id) return;
 
-  try {
-    isLoading.value = true;
-    error.value = null;
-    
-    // Buscar viagens
-    const viagensData: Viagem[] = await viagemService.getByUsuarioId('passageiro', user.value.id);
-    
-    if (Array.isArray(viagensData)) {
-      // Processar cada viagem
-      const viagensProcessadas = [];
-      
-      for (const viagem of viagensData) {
-        // Buscar nome do motorista
-        let motoristaNome = 'Motorista não encontrado';
-        try {
-          const motoristaResponse = await motoristaService.getById(viagem.motoristaId);
-          if (motoristaResponse.data && motoristaResponse.data.nome) {
-            motoristaNome = motoristaResponse.data.nome;
-          }
-        } catch (err) {
-          console.error('Erro ao buscar motorista:', err);
-        }
+    try {
+        isLoading.value = true;
+        error.value = null;
         
-        viagensProcessadas.push({
-          ...viagem,
-          motoristaNome,          
-        });
-      }
-      
-      viagens.value = viagensProcessadas;
-    } else {
-      error.value = 'Formato de resposta inválido';
-      viagens.value = [];
+        // Buscar viagens
+        const viagensData: Viagem[] = await viagemService.getByUsuarioId('motorista', user.value.id);
+        
+        if (Array.isArray(viagensData)) {
+            // Processar cada viagem
+            const viagensProcessadas = [];
+
+            for (const viagem of viagensData) {
+                // Buscar nome do motorista        
+                viagensProcessadas.push({
+                    ...viagem,
+                });
+            }
+            
+            viagens.value = viagensProcessadas;
+        } else {
+            error.value = 'Formato de resposta inválido';
+            viagens.value = [];
+        }
+    } catch (err) {
+        console.error('Erro ao carregar viagens:', err);
+        error.value = 'Erro ao carregar suas viagens. Tente novamente mais tarde.';
+        viagens.value = [];
+    } finally {
+        isLoading.value = false;
     }
-  } catch (err) {
-    console.error('Erro ao carregar viagens:', err);
-    error.value = 'Erro ao carregar suas viagens. Tente novamente mais tarde.';
-    viagens.value = [];
-  } finally {
-    isLoading.value = false;
-  }
 }
 
-// Função para visualizar detalhes da viagem
 function verDetalhes(viagemId: string) {
-  router.push(`/viagem/${viagemId}`);
+    router.push(`/viagem/${viagemId}`);
 }
 
-// Função para cancelar viagem
 async function cancelarViagem(viagemId: string) {
-  if (!user.value?.id) return;
+    if (!user.value?.id) return;
 
-  try {
-    isLoading.value = true;
-    await viagemService.cancelarViagem(viagemId, user.value.id, user.value.tipo);
-    // Recarregar viagens após cancelamento
-    await carregarViagens();
-  } catch (err) {
-    console.error('Erro ao cancelar viagem:', err);
-    error.value = 'Não foi possível cancelar a viagem. Tente novamente.';
-  } finally {
-    isLoading.value = false;
-  }
+    try {
+        isLoading.value = true;
+        error.value = null;
+        
+        // Cancelar viagem
+        await viagemService.cancelarViagem(viagemId, user.value.id, user.value.tipo);
+        
+        // Recarregar viagens após cancelamento
+        await carregarViagens();
+    } catch (err) {
+        console.error('Erro ao cancelar viagem:', err);
+        error.value = 'Erro ao cancelar a viagem. Tente novamente mais tarde.';
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 onMounted(async () => {
-  // Verificar autenticação
-  if (!authStore.isAuthenticated || authStore.userType !== 'passageiro') {
+    // Verificar autenticação
+  if (!authStore.isAuthenticated || authStore.userType !== 'motorista') {
     router.push('/login');
     return;
   }
 
-  // Carregar as viagens do passageiro
+  // Carregar as viagens do motorista
   await carregarViagens();
 });
 </script>
 
 <template>
-  <main class="lista-viagens">
+<main class="lista-viagens">
     <h2 class="lista-titulo">Suas viagens</h2>
     
     <div v-if="isLoading" class="loading">
@@ -109,7 +100,7 @@ onMounted(async () => {
     
     <div v-else-if="viagens.length === 0" class="empty-state">
       <p>Você ainda não tem viagens agendadas.</p>
-      <router-link to="/passageiro" class="btn-primary">Voltar ao Dashboard</router-link>
+      <router-link to="/motorista" class="btn-primary">Voltar ao Dashboard</router-link>
     </div>
     
     <div v-else class="viagens-container">
@@ -126,7 +117,10 @@ onMounted(async () => {
         
         <div class="viagem-info">
           <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
-          <p><strong>Motorista:</strong> {{ viagem.motoristaNome }}</p>
+          <p><strong>Passageiros:</strong></p>
+          <p v-for="passageiro in passageiros">
+            {{ passageiro.nome }}
+          </p>
         </div>
         
         <div class="viagem-acoes">
@@ -145,7 +139,7 @@ onMounted(async () => {
     </div>
     
     <div class="back-link">
-      <router-link to="/passageiro" class="btn-voltar">Voltar ao Dashboard</router-link>
+      <router-link to="/motorista" class="btn-voltar">Voltar ao Dashboard</router-link>
     </div>
   </main>
 </template>
