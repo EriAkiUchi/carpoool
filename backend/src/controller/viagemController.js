@@ -85,10 +85,38 @@ class ViagemController {
             }
             // Se houver viagens, mapeia os documentos para o formato desejado
             // Convertendo os documentos do Firestore para objetos Viagem
-            const viagens = viagensSnapshot.docs.map(doc => {
+            let viagens = viagensSnapshot.docs.map(doc => {
                 const viagem = Viagem.fromFirestore(doc);
                 return { id: doc.id, ...viagem };
             });
+
+            //retornar o nome dos passageiros caso o usuário seja motorista
+            if(userType === 'motorista') {
+                //Para cada viagem, busca os detalhes dos passageiros
+                for (let i = 0; i < viagens.length; i++) {
+                    const viagem = viagens[i];
+
+                    if(viagem.passageirosIds && viagem.passageirosIds.length > 0) {
+                        const passageirosData = [];
+                        for (const passageiroId of viagem.passageirosIds) {
+                            const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
+                            if(passageiroDoc.exists) {
+                                passageirosData.push({
+                                    id: passageiroId,
+                                    nome: passageiroDoc.data().nome,
+                                });
+                            } 
+                            else {
+                                return res.status(404).json({ message: 'Passageiro não encontrado na viagem' });
+                            }
+                        }
+                        // Substitui os IDs pelos dados dos passageiros
+                        viagem.passageirosIds = [...passageirosData];
+                        viagens[i] = viagem;
+                    }
+                }
+            }
+
             res.status(200).json(viagens);
         } catch (erro) {
             res.status(500).json({ message: 'Erro ao buscar viagens: ' + erro });

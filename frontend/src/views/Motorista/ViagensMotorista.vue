@@ -117,10 +117,12 @@ onMounted(async () => {
         
         <div class="viagem-info">
           <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
-          <p><strong>Passageiros:</strong></p>
-          <p v-for="passageiro in passageiros">
+          <p><strong>Passageiros:</strong>
+            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro.id">
             {{ passageiro.nome }}
+            </p>
           </p>
+          
         </div>
         
         <div class="viagem-acoes">

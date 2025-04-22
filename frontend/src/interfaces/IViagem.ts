@@ -10,12 +10,17 @@ export interface Rota {
   rota: any; // Objeto de rota do Google Maps
 }
 
+interface Passageiros {
+  id: string;
+  nome: string;
+}
+
 export default interface Viagem {
   id: string;
   motoristaId: string;
   motoristaNome?: string;
   nomeEmpresa: string;
-  passageirosIds: string[];
+  passageirosIds: Passageiros[];
   destinoComum: Endereco;
   rotas: string;
   status: string;
