@@ -126,9 +126,9 @@ onMounted(async () => {
         </div>
         
         <div class="viagem-acoes">
-          <button @click="verDetalhes(viagem.id)" class="btn-detalhes">
+          <RouterLink :to="`/viagem/${viagem.id}`" class="btn-detalhes">
             Ver detalhes
-          </button>
+          </RouterLink>
           
           <button 
             v-if="viagem.status === 'em-andamento'"

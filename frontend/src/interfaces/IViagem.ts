@@ -21,8 +21,9 @@ export default interface Viagem {
   motoristaNome?: string;
   nomeEmpresa: string;
   passageirosIds: Passageiros[];
-  destinoComum: Endereco;
-  rotas: string;
+  enderecoDestino: Endereco;
+  rotaDeViagem: string;
   status: string;
   horarioDeSaida: string;
+  vagasRestantes: number;
 }

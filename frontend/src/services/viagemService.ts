@@ -1,11 +1,6 @@
 import api from '@/config/axios';
 
 class ViagemService {
-    //Obter todas as rotas de viagens
-    async getAll() {
-        const resposta = await api.get('maps/rota');
-        return resposta.data;
-    }
 
     //Obter rota pelo id
     async getById(id: string) {
