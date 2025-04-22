@@ -24,7 +24,7 @@ onMounted(() => {
     <main class="dashboard-container">
         <section class="dashboard-header">
             <h2>Pagina do Passageiro</h2>
-            <button @click="handleLogout" class="logout-button">Sair</button>
+            <button @click.prevent="handleLogout" class="logout-button">Sair</button>
         </section>
 
         <section class="welcome-section">
