@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { computed } from 'vue';
 import { userAuthStore } from './store/auth';
+import router from './router';
 
 const authStore = userAuthStore();
 authStore.init(); // Inicializa o store com dados do localStorage
@@ -11,6 +12,7 @@ const userType = computed(() => authStore.userType);
 
 function logout() {
   authStore.logout();
+  router.push('/login');
 }
 </script>
 
