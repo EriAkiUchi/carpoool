@@ -7,11 +7,29 @@ import mapaRotaService from '@/services/mapaRotaService';
 import type Viagem from '@/interfaces/IViagem';
 import { GoogleMap, Polyline, AdvancedMarker } from 'vue3-google-map';
 
-// Define Library enum manually since it's not exported
-enum Library {
-  PLACES = 'places',
-  GEOMETRY = 'geometry',
-  MARKER = 'marker'
+// Interfaces para tipar os dados
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface PolylineOptions {
+  strokeColor: string;
+  strokeWeight: number;
+  strokeOpacity: number;
+  zIndex: number;
+}
+
+interface RotaPassageiro {
+  path: string;
+  options: PolylineOptions;
+  passageiroId: string;
+}
+
+interface PointMarker {
+  position: LatLng;
+  title: string;
+  type: 'embarque' | 'destino';
 }
 
 const route = useRoute();
@@ -22,183 +40,154 @@ const rota = ref<any | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 const viagemId = route.params.id as string;
-const mapInstance = ref<google.maps.Map | null>(null);
-const markersArray = ref([]);
+const mapRef = ref<google.maps.Map | null>(null);
 
 // Centro do mapa (inicialmente São Paulo)
-const center = ref({
-    lat: -23.550520, 
-    lng: -46.633308
+const center = ref<LatLng>({
+  lat: -23.550520, 
+  lng: -46.633308
 });
-
-// Adicionar logs para debug
-function logMapData() {
-    console.log('---- DEBUG DA ROTA ----');
-    console.log('Viagem:', viagem.value);
-    console.log('Rota completa:', rota.value);
-    console.log('Rotas de passageiros computadas:', rotasPassageiros.value);
-    console.log('Rota final computada:', rotaFinal.value);
-    console.log('Marcadores:', marcadoresEmbarque.value);
-    console.log('Marcador destino:', marcadorDestino.value);
-}
 
 // Carregar detalhes da viagem
 async function carregarViagem() {
-    if (!viagemId) return;
+  if (!viagemId) return;
+  
+  try {
+    isLoading.value = true;
+    error.value = null;
     
-    try {
-        isLoading.value = true;
-        error.value = null;
-        
-        // Buscar viagem pelo ID
-        const viagemData = await viagemService.getById(viagemId);
-        viagem.value = viagemData;
-        console.log('Dados da viagem:', viagem.value);
-        
-        // Se a viagem tem um ID de rota, buscar a rota
-        if (viagem.value && viagem.value.rotaDeViagem) {
-            console.log('ID da rota:', viagem.value.rotaDeViagem);
-            const rotaData = await mapaRotaService.getRotaById(viagem.value.rotaDeViagem);
-            rota.value = rotaData;
-            console.log('Dados da rota:', rota.value);
-            
-            // Ajustar o centro do mapa para o primeiro ponto da rota
-            if (rota.value?.rotas?.[0]?.rota?.legs?.[0]?.start_location) {
-                const startLoc = rota.value.rotas[0].rota.legs[0].start_location;
-                center.value = {
-                    lat: parseFloat(startLoc.lat),
-                    lng: parseFloat(startLoc.lng)
-                };
-            }
-            
-            logMapData(); // Adicionar log após carregar os dados
-        }
-        
-    } catch (err) {
-        console.error('Erro ao carregar detalhes da viagem:', err);
-        error.value = 'Erro ao carregar detalhes da viagem. Tente novamente mais tarde.';
-    } finally {
-        isLoading.value = false;
+    // Buscar viagem pelo ID
+    const viagemData = await viagemService.getById(viagemId);
+    viagem.value = viagemData;
+    
+    // Se a viagem tem um ID de rota, buscar a rota
+    if (viagem.value && viagem.value.rotaDeViagem) {
+      const rotaData = await mapaRotaService.getRotaById(viagem.value.rotaDeViagem);
+      rota.value = rotaData;
+      
+      // Ajustar o centro do mapa para o primeiro ponto da rota
+      if (rota.value?.rotas?.[0]?.rota?.legs?.[0]?.start_location) {
+        const startLoc = rota.value.rotas[0].rota.legs[0].start_location;
+        center.value = {
+          lat: parseFloat(startLoc.lat),
+          lng: parseFloat(startLoc.lng)
+        };
+      }
     }
+    
+  } catch (err) {
+    console.error('Erro ao carregar detalhes da viagem:', err);
+    error.value = 'Erro ao carregar detalhes da viagem. Tente novamente mais tarde.';
+  } finally {
+    isLoading.value = false;
+  }
 }
 
-// Preparar polylines para rotas de passageiros
-const rotasPassageiros = computed(() => {
-    const result: Array<{
-        path: string;
-        options: {
-            strokeColor: string;
-            strokeWeight: number;
-            strokeOpacity: number;
-            zIndex: number;
-        };
-        passageiroId: string;
-    }> = [];
-    
-    if (!rota.value?.rotas) return result;
-    
-    for (const rotaItem of rota.value.rotas) {
-        if (rotaItem.rota?.overview_polyline?.points) {
-            try {
-                result.push({
-                    path: rotaItem.rota.overview_polyline.points,
-                    options: {
-                        strokeColor: '#3498db',
-                        strokeWeight: 5,
-                        strokeOpacity: 0.8,
-                        zIndex: 1
-                    },
-                    passageiroId: rotaItem.passageiroId
-                });
-            } catch (err) {
-                console.error('Erro ao processar rota:', err);
-            }
-        }
+// Preparar polylines para rotas dos passageiros
+const rotasPassageiros = computed<RotaPassageiro[]>(() => {
+  const result: RotaPassageiro[] = [];
+  
+  if (!rota.value?.rotas) return result;
+  
+  for (const rotaItem of rota.value.rotas) {
+    if (rotaItem.rota?.overview_polyline?.points) {
+      try {
+        result.push({
+          path: rotaItem.rota.overview_polyline.points,
+          options: {
+            strokeColor: '#3498db',
+            strokeWeight: 5,
+            strokeOpacity: 0.8,
+            zIndex: 3
+          },
+          passageiroId: rotaItem.passageiroId
+        });
+      } catch (err) {
+        console.error('Erro ao processar rota:', err);
+      }
     }
-    
-    return result;
+  }
+  return result;
 });
 
 // Preparar polyline para a rota final
 const rotaFinal = computed(() => {
-    if (!rota.value?.rotaFinal?.overview_polyline?.points) return null;
-    
-    return {
-        path: rota.value?.rotaFinal?.overview_polyline?.points,
-        options: {
-            strokeColor: '#2ecc71',
-            strokeWeight: 6,
-            strokeOpacity: 0.9,
-            zIndex: 2
-        }
-    };
-});
-
-// Preparar marcadores para os pontos de embarque
-const marcadoresEmbarque = computed(() => {
-    const marcadores: Array<{
-        position: {
-            lat: number;
-            lng: number;
-        };
-        title: string;
-        passageiroId: string;
-    }> = [];
-    
-    if (!rota.value?.rotas) return marcadores;
-    
-    for (const rotaItem of rota.value.rotas) {
-        if (rotaItem.rota?.legs?.[0]?.start_location) {
-            const loc = rotaItem.rota.legs[0].start_location;
-            marcadores.push({
-                position: {
-                    lat: parseFloat(loc.lat),
-                    lng: parseFloat(loc.lng)
-                },
-                title: `Local de embarque do passageiro ${rotaItem.passageiroId}`,
-                passageiroId: rotaItem.passageiroId
-            });
-        }
+  if (!rota.value?.rotaFinal?.overview_polyline?.points) return null;
+  
+  return {
+    path: rota.value.rotaFinal.overview_polyline.points,
+    options: {
+      strokeColor: '#2ecc71',
+      strokeWeight: 6,
+      strokeOpacity: 0.9,
+      zIndex: 2
     }
-    
-    return marcadores;
+  };
 });
 
-// Marcador para o destino final
-const marcadorDestino = computed(() => {
-    if (!rota.value?.rotaFinal?.legs?.[0]?.end_location) return null;
-    
+// Preparar marcadores para os pontos de embarque e destino
+const marcadores = computed<PointMarker[]>(() => {
+  const result: PointMarker[] = [];
+  
+  // Adicionar marcadores de embarque
+  if (rota.value?.rotas) {
+    for (const rotaItem of rota.value.rotas) {
+      if (rotaItem.rota?.legs?.[0]?.start_location) {
+        const loc = rotaItem.rota.legs[0].start_location;
+        result.push({
+          position: {
+            lat: parseFloat(loc.lat),
+            lng: parseFloat(loc.lng)
+          },
+          title: `Local de embarque de ${rotaItem.passageiroNome || 'passageiro'}`,
+          type: 'embarque'
+        });
+      }
+    }
+  }
+  
+  // Adicionar marcador de destino final
+  if (rota.value?.rotaFinal?.legs?.[0]?.end_location) {
     const endLoc = rota.value.rotaFinal.legs[0].end_location;
-    return {
-        position: {
-            lat: parseFloat(endLoc.lat),
-            lng: parseFloat(endLoc.lng)
-        },
-        title: 'Destino final'
-    };
+    result.push({
+      position: {
+        lat: parseFloat(endLoc.lat),
+        lng: parseFloat(endLoc.lng)
+      },
+      title: 'Destino final',
+      type: 'destino'
+    });
+  }
+  
+  return result;
 });
 
-// Função para lidar com o evento de carregamento do mapa
+// Manipulador para quando o mapa for carregado
 function onMapLoad(map: google.maps.Map) {
-    console.log("Mapa carregado:", map);
-    mapInstance.value = map;
+  mapRef.value = map;
+  
+  // Ajustar viewport para mostrar todas as rotas e marcadores
+  if (marcadores.value.length > 0) {
+    const bounds = new google.maps.LatLngBounds();
+    for (const marker of marcadores.value) {
+      bounds.extend(marker.position);
+    }
+    map.fitBounds(bounds);
+  }
 }
 
 onMounted(async () => {
-    // Verificar autenticação
-    if (!authStore.isAuthenticated) {
-        router.push('/login');
-        return;
-    }
-    
-    await carregarViagem();
+  // Verificar autenticação
+  if (!authStore.isAuthenticated) {
+    router.push('/login');
+    return;
+  }
+  
+  await carregarViagem();
 });
 
 // API Key (idealmente deve vir do arquivo .env)
-const googleMapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
-
-// Carregar bibliotecas adicionais do Google Maps
-const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 </script>
 
 <template>
@@ -233,12 +222,13 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
           <p><strong>Vagas restantes:</strong> {{ viagem.vagasRestantes }}</p>
           
           <h4>Destino</h4>
-          <p>
-            {{ viagem.enderecoDestino?.logradouro }}, 
-            {{ viagem.enderecoDestino?.numero }} - 
-            {{ viagem.enderecoDestino?.bairro }}, 
-            {{ viagem.enderecoDestino?.cidade }}
+          <p v-if="viagem.enderecoDestino">
+            {{ viagem.enderecoDestino.logradouro }}, 
+            {{ viagem.enderecoDestino.numero }} - 
+            {{ viagem.enderecoDestino.bairro }}, 
+            {{ viagem.enderecoDestino.cidade }}
           </p>
+          <p v-else>Endereço não disponível</p>
           
           <h4>Passageiros</h4>
           <ul v-if="viagem.passageirosIds && viagem.passageirosIds.length">
@@ -252,26 +242,15 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
       
       <div class="mapa-container">
         <h4>Rota da viagem</h4>
-        <div v-if="rota" class="debug-info">
-          <details>
-            <summary>Dados da rota (debug)</summary>
-            <div>
-              <p>Rota final: {{ rotaFinal !== null ? 'Presente' : 'Ausente' }}</p>
-              <p>Rotas passageiros: {{ rotasPassageiros.length }}</p>
-              <p>Total de marcadores: {{ marcadoresEmbarque.length + (marcadorDestino ? 1 : 0) }}</p>
-              <button @click="logMapData" class="debug-button">Mostrar detalhes no console</button>
-            </div>
-          </details>
-        </div>
-        <div v-if="rota">
+        <div v-if="rota && googleMapsApiKey">
           <GoogleMap
             :api-key="googleMapsApiKey"
             :center="center"
             :zoom="12"
-            :libraries="libraries"
+            map-id=import.meta.env.MAP_ID            
             class="google-map"
             @load="onMapLoad"
-          >            
+          >
             <!-- Polylines para rotas dos passageiros -->
             <Polyline
               v-for="(rotaPassageiro, idx) in rotasPassageiros"
@@ -289,42 +268,22 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
               :encoded="true"
             />
             
-            <!-- Marcadores de embarque com AdvancedMarker -->
+            <!-- Marcadores com AdvancedMarker -->
             <AdvancedMarker
-              v-for="(marcador, idx) in marcadoresEmbarque"
-              :key="`embarque-${idx}`"
-              :options="{
-                position: marcador.position,
-                title: marcador.title
-              }"
+              v-for="(marker) in marcadores" 
+              :options="{ position: marker.position, title: marker.title }"
             >
               <template #default>
-                <div style="background-color: #3498db; width: 24px; height: 24px; border-radius: 50%; 
-                           display: flex; justify-content: center; align-items: center; color: white; 
-                           font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-                  P
-                </div>
-              </template>
-            </AdvancedMarker>
-            
-            <!-- Marcador de destino com AdvancedMarker -->
-            <AdvancedMarker
-              v-if="marcadorDestino"
-              :options="{
-                position: marcadorDestino.position,
-                title: marcadorDestino.title
-              }"
-            >
-              <template #default>
-                <div style="background-color: #2ecc71; width: 28px; height: 28px; border-radius: 50%; 
-                           display: flex; justify-content: center; align-items: center; color: white; 
-                           font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-                  D
+                <div>
+                  {{ marker.type === 'embarque' ? 'P' : 'D' }}
                 </div>
               </template>
             </AdvancedMarker>
           </GoogleMap>
         </div>
+        <p v-else-if="!googleMapsApiKey" class="no-route-message">
+          Chave da API do Google Maps não configurada.
+        </p>
         <p v-else class="no-route-message">
           Não há rota definida para esta viagem.
         </p>
@@ -344,6 +303,7 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .detalhe-titulo {
@@ -356,21 +316,30 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
 .loading, .error-message, .empty-state {
   text-align: center;
   padding: 2rem 0;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
 }
 
 .error-message {
   color: #e74c3c;
+  border-left: 4px solid #e74c3c;
+  padding-left: 1rem;
 }
 
-.retry-button, .debug-button {
-  margin-top: 0.5rem;
-  padding: 0.25rem 0.75rem;
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
   background-color: #3498db;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
 }
 
 .viagem-detalhe-content {
@@ -393,6 +362,7 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
   font-size: 1.4rem;
   color: #336699;
   margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 
 .status-badge {
@@ -432,11 +402,16 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
 
 .info-section p {
   margin: 0.5rem 0;
+  line-height: 1.5;
 }
 
 .info-section ul {
   padding-left: 1.5rem;
   margin: 0.5rem 0;
+}
+
+.info-section li {
+  margin-bottom: 0.25rem;
 }
 
 .mapa-container {
@@ -454,7 +429,7 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
 }
 
 .google-map {
-  height: 400px;
+  height: 500px;
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
@@ -464,6 +439,8 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
   text-align: center;
   padding: 2rem;
   color: #7f8c8d;
+  background-color: #f9f9f9;
+  border-radius: 8px;
 }
 
 .botoes-acoes {
@@ -482,27 +459,47 @@ const libraries = [Library.MARKER, Library.GEOMETRY, Library.PLACES];
   font-size: 1rem;
   text-decoration: none;
   transition: background-color 0.3s;
+  display: inline-block;
 }
 
 .btn-voltar:hover {
   background-color: #264d73;
 }
 
-.debug-info {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.debug-info details summary {
-  cursor: pointer;
-  color: #3498db;
+/* Marcadores personalizados */
+.custom-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
   font-weight: bold;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid white;
 }
 
-.debug-info details div {
-  padding: 0.5rem;
+.marker-embarque {
+  background-color: #3498db;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+}
+
+.marker-destino {
+  background-color: #2ecc71;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .viagem-detalhe-container {
+    padding: 1rem;
+  }
+  
+  .google-map {
+    height: 350px;
+  }
 }
 </style>
