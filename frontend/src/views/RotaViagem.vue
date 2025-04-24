@@ -5,7 +5,7 @@ import { userAuthStore } from '@/store/auth';
 import viagemService from '@/services/viagemService';
 import mapaRotaService from '@/services/mapaRotaService';
 import type Viagem from '@/interfaces/IViagem';
-import { GoogleMap, Polyline, AdvancedMarker } from 'vue3-google-map';
+import type { Loader } from '@googlemaps/js-api-loader';
 
 // Interfaces para tipar os dados
 interface LatLng {
@@ -20,8 +20,9 @@ interface PolylineOptions {
   zIndex: number;
 }
 
+// Interface ajustada para usar path decodificado
 interface RotaPassageiro {
-  path: string;
+  path: LatLng[]; // Alterado de string para LatLng[]
   options: PolylineOptions;
   passageiroId: string;
 }
@@ -30,6 +31,7 @@ interface PointMarker {
   position: LatLng;
   title: string;
   type: 'embarque' | 'destino';
+  key: string; // Adicionado para garantir chave única no v-for
 }
 
 const route = useRoute();
@@ -41,6 +43,7 @@ const isLoading = ref(true);
 const error = ref<string | null>(null);
 const viagemId = route.params.id as string;
 const mapRef = ref<google.maps.Map | null>(null);
+const mapContainer = ref<HTMLDivElement | null>(null);
 
 // Centro do mapa (inicialmente São Paulo)
 const center = ref<LatLng>({
@@ -83,97 +86,148 @@ async function carregarViagem() {
   }
 }
 
-// Preparar polylines para rotas dos passageiros
+// Helper to decode using Google Maps geometry library
+function decodePath(encoded: string): LatLng[] {
+  if (typeof google === 'undefined' || !google.maps.geometry) return [];
+  const path = google.maps.geometry.encoding.decodePath(encoded);
+  return path.map((pt: google.maps.LatLng) => ({ lat: pt.lat(), lng: pt.lng() }));
+}
+
+// Preparar polylines para rotas dos passageiros (com decodePath)
 const rotasPassageiros = computed<RotaPassageiro[]>(() => {
   const result: RotaPassageiro[] = [];
-  
   if (!rota.value?.rotas) return result;
-  
+
   for (const rotaItem of rota.value.rotas) {
-    if (rotaItem.rota?.overview_polyline?.points) {
-      try {
-        result.push({
-          path: rotaItem.rota.overview_polyline.points,
-          options: {
-            strokeColor: '#3498db',
-            strokeWeight: 5,
-            strokeOpacity: 0.8,
-            zIndex: 3
-          },
-          passageiroId: rotaItem.passageiroId
-        });
-      } catch (err) {
-        console.error('Erro ao processar rota:', err);
+    const legs = rotaItem.rota?.legs?.[0];
+    if (legs?.steps && Array.isArray(legs.steps)) {
+      const decodedPath: LatLng[] = [];
+      for (const step of legs.steps) {
+        if (step.polyline?.points) {
+          decodedPath.push(...decodePath(step.polyline.points));
+        }
+      }
+      if (decodedPath.length) {
+        result.push({ path: decodedPath, options: { strokeColor: '#3498db', strokeWeight: 5, strokeOpacity: 0.8, zIndex: 3 }, passageiroId: rotaItem.passageiroId });
       }
     }
   }
   return result;
 });
 
-// Preparar polyline para a rota final
-const rotaFinal = computed(() => {
-  if (!rota.value?.rotaFinal?.overview_polyline?.points) return null;
-  
-  return {
-    path: rota.value.rotaFinal.overview_polyline.points,
-    options: {
-      strokeColor: '#2ecc71',
-      strokeWeight: 6,
-      strokeOpacity: 0.9,
-      zIndex: 2
-    }
-  };
+// Preparar polyline para a rota final (com decodePath)
+const rotaFinal = computed<{ path: LatLng[]; options: PolylineOptions } | null>(() => {
+  const encoded = rota.value?.rotaFinal?.overview_polyline?.points;
+  if (!encoded) return null;
+  const decodedPath = decodePath(encoded);
+  if (!decodedPath.length) return null;
+  return { path: decodedPath, options: { strokeColor: '#2ecc71', strokeWeight: 6, strokeOpacity: 0.9, zIndex: 2 } };
 });
 
 // Preparar marcadores para os pontos de embarque e destino
 const marcadores = computed<PointMarker[]>(() => {
   const result: PointMarker[] = [];
-  
-  // Adicionar marcadores de embarque
+  let markerKeyCounter = 0; // Para garantir chaves únicas
+
+  // Adicionar marcadores de embarque e desembarque de cada passageiro
   if (rota.value?.rotas) {
-    for (const rotaItem of rota.value.rotas) {
-      if (rotaItem.rota?.legs?.[0]?.start_location) {
+    for (const [index, rotaItem] of rota.value.rotas.entries()) {
+      const leg = rotaItem.rota?.legs?.[0];
+      // Marcador de embarque
+      if (leg?.start_location) {
         const loc = rotaItem.rota.legs[0].start_location;
-        result.push({
-          position: {
-            lat: parseFloat(loc.lat),
-            lng: parseFloat(loc.lng)
-          },
-          title: `Local de embarque de ${rotaItem.passageiroNome || 'passageiro'}`,
-          type: 'embarque'
-        });
+        const lat = parseFloat(loc.lat);
+        const lng = parseFloat(loc.lng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          result.push({ position: { lat, lng }, title: `Embarque ${index + 1}: ${rotaItem.passageiroNome || 'Passageiro'}`, type: 'embarque', key: `marker-${markerKeyCounter++}` });
+        }
+      }
+      // Marcador de destino do passageiro
+      if (leg?.end_location) {
+        const endLoc = leg.end_location;
+        const lat2 = parseFloat(endLoc.lat);
+        const lng2 = parseFloat(endLoc.lng);
+        if (!isNaN(lat2) && !isNaN(lng2)) {
+          result.push({ position: { lat: lat2, lng: lng2 }, title: `Desembarque ${index + 1}: ${rotaItem.passageiroNome || 'Passageiro'}`, type: 'destino', key: `marker-${markerKeyCounter++}` });
+        }
       }
     }
   }
   
-  // Adicionar marcador de destino final
+  // Adicionar marcador de destino final (rotaFinal)
   if (rota.value?.rotaFinal?.legs?.[0]?.end_location) {
     const endLoc = rota.value.rotaFinal.legs[0].end_location;
-    result.push({
-      position: {
-        lat: parseFloat(endLoc.lat),
-        lng: parseFloat(endLoc.lng)
-      },
-      title: 'Destino final',
-      type: 'destino'
-    });
+    const latf = parseFloat(endLoc.lat);
+    const lngf = parseFloat(endLoc.lng);
+    if (!isNaN(latf) && !isNaN(lngf)) {
+      result.push({ position: { lat: latf, lng: lngf }, title: 'Destino final', type: 'destino', key: `marker-${markerKeyCounter++}` });
+    }
   }
   
   return result;
 });
 
-// Manipulador para quando o mapa for carregado
-function onMapLoad(map: google.maps.Map) {
-  mapRef.value = map;
-  
-  // Ajustar viewport para mostrar todas as rotas e marcadores
-  if (marcadores.value.length > 0) {
-    const bounds = new google.maps.LatLngBounds();
-    for (const marker of marcadores.value) {
-      bounds.extend(marker.position);
-    }
-    map.fitBounds(bounds);
+// Initialize the map and add all overlays (polylines and markers)
+async function initMap() {
+  if (!mapContainer.value) return;
+  // Load Google Maps script with geometry library if needed
+  if (typeof google === 'undefined' || !google.maps.geometry) {
+    const loader = new (await import('@googlemaps/js-api-loader')).Loader({
+      apiKey: googleMapsApiKey,
+      libraries: ['geometry']
+    });
+    await loader.load();
   }
+  mapRef.value = new google.maps.Map(mapContainer.value, {
+    center: center.value,
+    zoom: 12,
+    mapId: mapId
+  });
+  // Fit bounds
+  const bounds = new google.maps.LatLngBounds();
+  // Add passenger routes
+  for (const rotaP of rotasPassageiros.value) {
+    const poly = new google.maps.Polyline({
+      path: rotaP.path,
+      strokeColor: rotaP.options.strokeColor,
+      strokeWeight: rotaP.options.strokeWeight,
+      strokeOpacity: rotaP.options.strokeOpacity,
+      zIndex: rotaP.options.zIndex,
+      map: mapRef.value
+    });
+    rotaP.path.forEach(pt => bounds.extend(pt));
+  }
+  // Add final route
+  if (rotaFinal.value) {
+    new google.maps.Polyline({
+      path: rotaFinal.value.path,
+      strokeColor: rotaFinal.value.options.strokeColor,
+      strokeWeight: rotaFinal.value.options.strokeWeight,
+      strokeOpacity: rotaFinal.value.options.strokeOpacity,
+      zIndex: rotaFinal.value.options.zIndex,
+      map: mapRef.value
+    });
+    rotaFinal.value.path.forEach(pt => bounds.extend(pt));
+  }
+  // Add markers
+  for (const mk of marcadores.value) {
+    new google.maps.Marker({
+      position: mk.position,
+      title: mk.title,
+      map: mapRef.value,
+      label: { text: mk.type === 'embarque' ? 'P' : 'D', color: 'white', fontWeight: 'bold' },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: mk.type === 'embarque' ? '#3498db' : '#e74c3c',
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: '#fff'
+      }
+    });
+    bounds.extend(mk.position);
+  }
+  mapRef.value.fitBounds(bounds);
 }
 
 onMounted(async () => {
@@ -184,10 +238,12 @@ onMounted(async () => {
   }
   
   await carregarViagem();
+  await initMap();
 });
 
-// API Key (idealmente deve vir do arquivo .env)
+// API Key and Map ID from env
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const mapId = import.meta.env.VITE_MAP_ID;
 </script>
 
 <template>
@@ -243,49 +299,14 @@ const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
       <div class="mapa-container">
         <h4>Rota da viagem</h4>
         <div v-if="rota && googleMapsApiKey">
-          <GoogleMap
-            :api-key="googleMapsApiKey"
-            :center="center"
-            :zoom="12"
-            map-id=import.meta.env.MAP_ID            
-            class="google-map"
-            @load="onMapLoad"
-          >
-            <!-- Polylines para rotas dos passageiros -->
-            <Polyline
-              v-for="(rotaPassageiro, idx) in rotasPassageiros"
-              :key="`rota-passageiro-${idx}`"
-              :path="rotaPassageiro.path"
-              :options="rotaPassageiro.options"
-              :encoded="true"
-            />
-            
-            <!-- Polyline para rota final -->
-            <Polyline
-              v-if="rotaFinal"
-              :path="rotaFinal.path"
-              :options="rotaFinal.options"
-              :encoded="true"
-            />
-            
-            <!-- Marcadores com AdvancedMarker -->
-            <AdvancedMarker
-              v-for="(marker) in marcadores" 
-              :options="{ position: marker.position, title: marker.title }"
-            >
-              <template #default>
-                <div>
-                  {{ marker.type === 'embarque' ? 'P' : 'D' }}
-                </div>
-              </template>
-            </AdvancedMarker>
-          </GoogleMap>
+          <!-- Container para Google Maps -->
+          <div ref="mapContainer" class="google-map"></div>
         </div>
         <p v-else-if="!googleMapsApiKey" class="no-route-message">
-          Chave da API do Google Maps não configurada.
+          Chave da API do Google Maps não configurada. Verifique o arquivo .env.
         </p>
         <p v-else class="no-route-message">
-          Não há rota definida para esta viagem.
+          Não há rota definida ou ocorreu um erro ao carregar a rota para esta viagem.
         </p>
       </div>
       
@@ -464,42 +485,5 @@ const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 .btn-voltar:hover {
   background-color: #264d73;
-}
-
-/* Marcadores personalizados */
-.custom-marker {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  font-weight: bold;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  border: 2px solid white;
-}
-
-.marker-embarque {
-  background-color: #3498db;
-  width: 28px;
-  height: 28px;
-  font-size: 14px;
-}
-
-.marker-destino {
-  background-color: #2ecc71;
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-}
-
-/* Responsividade para telas menores */
-@media (max-width: 768px) {
-  .viagem-detalhe-container {
-    padding: 1rem;
-  }
-  
-  .google-map {
-    height: 350px;
-  }
 }
 </style>
