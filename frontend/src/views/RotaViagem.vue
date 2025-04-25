@@ -30,7 +30,7 @@ interface RotaPassageiro {
 interface PointMarker {
   position: LatLng;
   title: string;
-  type: 'embarque' | 'destino';
+  type: 'embarque' | 'destino' | 'inicio';
   key: string; // Adicionado para garantir chave única no v-for
 }
 
@@ -144,26 +144,37 @@ const marcadores = computed<PointMarker[]>(() => {
 
   // Adicionar marcadores de embarque e desembarque de cada passageiro
   if (rota.value?.rotas) {
+
+    //Marcador de início da rota
+    if (rota.value.rotas[0]?.rota?.legs?.[0]?.start_location) {
+      const startLoc = rota.value.rotas[0].rota.legs[0].start_location;
+      const lat = parseFloat(startLoc.lat);
+      const lng = parseFloat(startLoc.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        result.push({ position: { lat, lng }, title: 'Início da rota', type: 'inicio', key: `marker-${markerKeyCounter++}` });
+      }
+    }
+
     for (const [index, rotaItem] of rota.value.rotas.entries()) {
       const leg = rotaItem.rota?.legs?.[0];
       // Marcador de embarque
-      if (leg?.start_location) {
-        const loc = rotaItem.rota.legs[0].start_location;
+      if (leg?.end_location) {
+        const loc = rotaItem.rota.legs[0].end_location;
         const lat = parseFloat(loc.lat);
         const lng = parseFloat(loc.lng);
         if (!isNaN(lat) && !isNaN(lng)) {
-          result.push({ position: { lat, lng }, title: `Embarque ${index + 1}: ${rotaItem.passageiroNome || 'Passageiro'}`, type: 'embarque', key: `marker-${markerKeyCounter++}` });
+          result.push({ position: { lat, lng }, title: `Embarque ${index+1}: ${'Passageiro'}`, type: 'embarque', key: `marker-${markerKeyCounter++}` });
         }
       }
       // Marcador de destino do passageiro
-      if (leg?.end_location) {
-        const endLoc = leg.end_location;
-        const lat2 = parseFloat(endLoc.lat);
-        const lng2 = parseFloat(endLoc.lng);
-        if (!isNaN(lat2) && !isNaN(lng2)) {
-          result.push({ position: { lat: lat2, lng: lng2 }, title: `Desembarque ${index + 1}: ${rotaItem.passageiroNome || 'Passageiro'}`, type: 'destino', key: `marker-${markerKeyCounter++}` });
-        }
-      }
+      // if (leg?.end_location) {
+      //   const endLoc = leg.end_location;
+      //   const lat2 = parseFloat(endLoc.lat);
+      //   const lng2 = parseFloat(endLoc.lng);
+      //   if (!isNaN(lat2) && !isNaN(lng2)) {
+      //     result.push({ position: { lat: lat2, lng: lng2 }, title: `Embarque ${index}: ${'Passageiro'}`, type: 'destino', key: `marker-${markerKeyCounter++}` });
+      //   }
+      // }
     }
   }
   
@@ -224,11 +235,19 @@ async function initMap() {
   }
   // Add markers
   for (const mk of marcadores.value) {
+    let text: string = '';
+    if(mk.type === 'embarque') {
+      text = 'E';
+    } else if(mk.type === 'destino') {
+      text = 'D';
+    } else if(mk.type === 'inicio') {
+      text = 'I';
+    }
     new google.maps.Marker({
       position: mk.position,
       title: mk.title,
       map: mapRef.value,
-      label: { text: mk.type === 'embarque' ? 'P' : 'D', color: 'white', fontWeight: 'bold' },
+      label: { text: text, color: 'white', fontWeight: 'bold' },
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 8,
