@@ -304,12 +304,12 @@ const mapId = import.meta.env.VITE_MAP_ID;
         </div>
         
         <div class="info-section">
-          <h4>Informações da Viagem</h4>
+          <h3>Informações da Viagem</h3>
           <p><strong>Horário de saída:</strong> {{ viagem.horarioDeSaida }}</p>
           <p><strong>Status:</strong> {{ viagem.status }}</p>
           <p><strong>Vagas restantes:</strong> {{ viagem.vagasRestantes }}</p>
           
-          <h4>Destino</h4>
+          <h3>Destino</h3>
           <p v-if="viagem.enderecoDestino">
             {{ viagem.enderecoDestino.logradouro }}, 
             {{ viagem.enderecoDestino.numero }} - 
@@ -318,7 +318,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
           </p>
           <p v-else>Endereço não disponível</p>
           
-          <h4>Passageiros</h4>
+          <h3>Passageiros</h3>
           <ul v-if="passageirosDetalhados.length">
             <li v-for="passageiro in passageirosDetalhados" :key="passageiro.id">
               {{ passageiro.nome }}
@@ -329,7 +329,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
       </div>
       
       <div class="mapa-container">
-        <h4>Rota da viagem</h4>
+        <h3>Rota da viagem</h3>
         <div v-if="rota && googleMapsApiKey">
           <!-- Container para Google Maps -->
           <div ref="mapContainer" class="google-map"></div>
@@ -446,7 +446,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
   margin-top: 1rem;
 }
 
-.info-section h4 {
+.info-section h3 {
   color: #336699;
   margin: 1.5rem 0 0.5rem;
   border-bottom: 1px solid #c3c3c3;
@@ -478,7 +478,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.mapa-container h4 {
+.mapa-container h3 {
   color: #336699;
   margin-top: 0;
   margin-bottom: 1rem;
