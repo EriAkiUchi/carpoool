@@ -31,18 +31,19 @@ class ViagemService {
             if(userType === 'passageiro') {
                 //Filtrar o passageiro da lista de passageiros
                 const passageirosAtualizados = viagemResposta.passageirosIds.filter((id: string) => {
-                    id !== viagemResposta.passageirosIds.includes(userId);
-                });
-    
+                    return id !== userId;
+                });    
                 //Atualizar a rota sem o passageiro
-                return api.put(`viagens/${viagemId}`, {
+                const resposta = await api.put(`viagens/${viagemId}`, {
                     passageirosIds: [...passageirosAtualizados],
                 });
+                return resposta.data;
             } 
             else { //motorista cancelou a viagem
-                return api.put(`viagens/${viagemId}`, {
+                const resposta = await api.put(`viagens/${viagemId}`, {
                     status: 'cancelada'
                 });
+                return resposta.data;
             }
 
         } catch (error) {
