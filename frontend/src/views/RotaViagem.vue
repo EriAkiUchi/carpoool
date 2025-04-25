@@ -5,7 +5,7 @@ import { userAuthStore } from '@/store/auth';
 import viagemService from '@/services/viagemService';
 import mapaRotaService from '@/services/mapaRotaService';
 import type Viagem from '@/interfaces/IViagem';
-import type { Loader } from '@googlemaps/js-api-loader';
+import passageiroService from '@/services/passageiroService';
 
 // Interfaces para tipar os dados
 interface LatLng {
@@ -38,6 +38,7 @@ const route = useRoute();
 const router = useRouter();
 const authStore = userAuthStore();
 const viagem = ref<Viagem | null>(null);
+const passageirosDetalhados = ref<{ id: string; nome: string }[]>([]);
 const rota = ref<any | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
@@ -63,6 +64,18 @@ async function carregarViagem() {
     const viagemData = await viagemService.getById(viagemId);
     viagem.value = viagemData;
     
+    // se vier só array de strings/id, buscamos o nome de cada um
+  if (Array.isArray(viagemData.passageirosIds) && typeof viagemData.passageirosIds[0] === 'string') {
+    passageirosDetalhados.value = await Promise.all(
+      (viagemData.passageirosIds as string[]).map(id =>
+        passageiroService.getById(id).then(res => ({ id: res.data.id, nome: res.data.nome }))
+      )
+    );
+  } else {
+    // caso já venha array de objetos { id, nome }
+    passageirosDetalhados.value = viagemData.passageirosIds as any;
+  }
+
     // Se a viagem tem um ID de rota, buscar a rota
     if (viagem.value && viagem.value.rotaDeViagem) {
       const rotaData = await mapaRotaService.getRotaById(viagem.value.rotaDeViagem);
@@ -287,8 +300,8 @@ const mapId = import.meta.env.VITE_MAP_ID;
           <p v-else>Endereço não disponível</p>
           
           <h4>Passageiros</h4>
-          <ul v-if="viagem.passageirosIds && viagem.passageirosIds.length">
-            <li v-for="passageiro in viagem.passageirosIds" :key="passageiro.id">
+          <ul v-if="passageirosDetalhados.length">
+            <li v-for="passageiro in passageirosDetalhados" :key="passageiro.id">
               {{ passageiro.nome }}
             </li>
           </ul>
@@ -311,7 +324,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
       </div>
       
       <div class="botoes-acoes">
-        <router-link to="/motorista/viagens" class="btn-voltar">
+        <router-link :to="`/${authStore.user?.tipo}/viagens`" class="btn-voltar">
           Voltar às viagens
         </router-link>
       </div>
@@ -417,21 +430,24 @@ const mapId = import.meta.env.VITE_MAP_ID;
 .info-section h4 {
   color: #336699;
   margin: 1.5rem 0 0.5rem;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid #c3c3c3;
   padding-bottom: 0.5rem;
 }
 
 .info-section p {
+  color: #336699;
   margin: 0.5rem 0;
   line-height: 1.5;
 }
 
 .info-section ul {
+  color: #336699;
   padding-left: 1.5rem;
   margin: 0.5rem 0;
 }
 
 .info-section li {
+  color: #336699;
   margin-bottom: 0.25rem;
 }
 
