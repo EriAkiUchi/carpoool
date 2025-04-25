@@ -121,7 +121,7 @@ const rotasPassageiros = computed<RotaPassageiro[]>(() => {
         }
       }
       if (decodedPath.length) {
-        result.push({ path: decodedPath, options: { strokeColor: '#3498db', strokeWeight: 5, strokeOpacity: 0.8, zIndex: 3 }, passageiroId: rotaItem.passageiroId });
+        result.push({ path: decodedPath, options: { strokeColor: '#e90000', strokeWeight: 5, strokeOpacity: 0.8, zIndex: 3 }, passageiroId: rotaItem.passageiroId });
       }
     }
   }
