@@ -3,6 +3,26 @@ import MapaDeRota from '../models/MapaDeRota.js';
 
 const MAPS_API_KEY = process.env.MAPS_API_KEY;
 
+const quickSort = (arr) => {
+    if (arr.length <= 1) {
+      return arr;
+    }
+  
+    let pivot = arr[0];
+    let leftArr = [];
+    let rightArr = [];
+  
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i].distancia < pivot.distancia) {
+        leftArr.push(arr[i]);
+      } else {
+        rightArr.push(arr[i]);
+      }
+    }
+  
+    return [...quickSort(leftArr), pivot, ...quickSort(rightArr)];
+  };
+
 async function calcularDistancia(origem, destino) {
     const resposta = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origem}&destinations=${destino}&key=${MAPS_API_KEY}`);
     return resposta.data;
@@ -226,6 +246,7 @@ class MapsController {
     static async calcularMotoristaMaixProximo(req, res, firestore) {
         try {
             const { passageiroId } = req.params;
+            const { distanciaMaxima } = req.query; //distancia máxima em metros
             const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
             if(!passageiroDoc.exists) {
                 return res.status(404).json({ message: 'Passageiro não encontrado' });                
@@ -236,27 +257,35 @@ class MapsController {
 
             const motoristasSnapshot = await firestore.collection('motoristas').get();
             const motoristas = [];
-            motoristasSnapshot.forEach(doc => {
+            motoristasSnapshot.forEach(doc => { //busca todos os motoristas
                 const motorista = doc.data();
                 motorista.id = doc.id;
                 motoristas.push(motorista);
             });
 
-            let motoristaMaisProximo = null;
-            let menorDistancia = Infinity;
+            let motoristasMaisProximos = []; //array de objetos com os motoristas mais próximos
+            let distanciaMinima = Infinity;
 
             for (const motorista of motoristas) {
                 const coordenadasMotorista = `${motorista.coordenadasOrigem.lat},${motorista.coordenadasOrigem.lng}`;
                 const distanciaData = await calcularDistancia(coordenadasMotorista, coordenadasPassageiro);
                 const distancia = distanciaData.rows[0].elements[0].distance.value;
                 
-                if(distancia < menorDistancia) {
-                    menorDistancia = distancia;
-                    motoristaMaisProximo = motorista;
+                if(distancia < distanciaMaxima) {
+                    const objMotorista = {
+                        id: motorista.id,
+                        distancia: distancia,
+                    }
+                    motoristasMaisProximos.push(objMotorista);
+                    motoristasMaisProximos = quickSort(motoristasMaisProximos); // ordena o array de motoristas mais próximos
+                    if(motoristasMaisProximos.length > 5) { // limita o array a 5 motoristas mais próximos
+                        motoristasMaisProximos.pop();
+                    }
+                    distanciaMinima = motoristasMaisProximos[motoristasMaisProximos.length - 1].distancia; // atualiza a distância mínima
                 }
             }
 
-            res.status(200).json({ motoristaMaisProximo, distancia: menorDistancia })
+            res.status(200).json({ ...motoristasMaisProximos });
 
         } catch (erro) {
             res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });
