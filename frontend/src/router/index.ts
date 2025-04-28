@@ -76,6 +76,12 @@ const rotas: RouteRecordRaw[] = [
     component: () => import('../views/RotaViagem.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/passageiro/solicitar-viagem',
+    name: 'passageiro-solicitar-viagem',
+    component: () => import('../views/Passageiro/SolicitarViagem.vue'),
+    meta: { requiresAuth: true, role: 'passageiro' }
+  }
 ];
 
 const router = createRouter({

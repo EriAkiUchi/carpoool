@@ -8,6 +8,21 @@ class ViagemService {
         return resposta.data;
     }
 
+    async getViagensEspecificas(viagensIds: string[]) {
+        try {
+            const resposta = await api.get('maps/rotas', {
+                params: {
+                    viagensIds
+                }
+            });
+            return resposta.data;
+        } catch (error) {
+            console.error('Erro ao buscar viagens:', error);
+            return null;
+        }
+
+    }
+
     //Obter rota filtrando pelo passageiro ou motorista
     async getByUsuarioId(userType: 'passageiro' | 'motorista', id: string) {
         try {

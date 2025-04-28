@@ -36,7 +36,7 @@ onMounted(() => {
             <div class="dashboard-card">
                 <h4>Encontrar carona</h4>
                 <p>Busque caronas disponíveis para seu destino.</p>
-                <button class="card-button">Buscar</button>
+                <RouterLink to="/passageiro/solicitar-viagem" class="card-button">Buscar</RouterLink>
             </div>
 
             <section class="dashboard-card">
