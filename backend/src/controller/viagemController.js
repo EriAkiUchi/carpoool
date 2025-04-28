@@ -26,6 +26,37 @@ class ViagemController {
         }
     }
 
+    static async getViagensEspecificas(req, res, firestore) {
+        const { viagensIds } = req.params;
+
+        // Verifica se o parâmetro viagensIds está presente e não é vazio
+        if (!viagensIds || viagensIds.trim() === '') {
+            return res.status(400).json({ message: 'Parâmetro viagensIds não fornecido ou vazio' });
+        }
+
+        // Divide a string em um array de IDs
+        // e remove espaços em branco extras
+        const ids = viagensIds.split(',');
+        try {
+            const viagensRef = firestore.collection('viagens');
+
+            // Busca as viagens com os IDs fornecidos
+            // Usando FieldPath.documentId() para buscar documentos por ID
+            const viagensSnapshot = await viagensRef.where(firestore.FieldPath.documentId(), 'in', ids).get();
+
+            if (viagensSnapshot.empty) {
+                return res.status(404).json({ message: 'Nenhuma viagem encontrada' });
+            }
+
+            // Convertendo os documentos do Firestore para objetos Viagem
+            const viagens = viagensSnapshot.docs.map(doc => Viagem.fromFirestore(doc));
+            res.status(200).json(viagens);
+
+        } catch (erro) {
+            res.status(500).json({ message: 'erro em pegar as viagens: ' + erro });
+        }
+    }
+
     static async getViagemId(req, res, firestore) {
         try {
             const { id } = req.params;

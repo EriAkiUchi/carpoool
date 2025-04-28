@@ -34,6 +34,7 @@ const routes = (app, firestore) => {
     app.get('/carros/:id', async (req, res) => CarroController.getCarroId(req, res, req.app.locals.firestore));
     app.get(`/viagens/:userType/:id`, async (req, res) => ViagemController.getViagensByUserId(req, res, req.app.locals.firestore));
     app.get('/viagens/:id', async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
+    app.get('/viagens/:viagensIds', async (req, res) => ViagemController.getViagensByIds(req, res, req.app.locals.firestore));
 
     app.post('/passageiros', async (req, res) => PassageiroController.createPassageiro(req, res, req.app.locals.firestore));
     app.post('/motoristas', async (req, res) => MotoristaController.createMotorista(req, res, req.app.locals.firestore));
