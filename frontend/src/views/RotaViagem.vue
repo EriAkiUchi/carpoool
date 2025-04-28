@@ -6,33 +6,7 @@ import viagemService from '@/services/viagemService';
 import mapaRotaService from '@/services/mapaRotaService';
 import type Viagem from '@/interfaces/IViagem';
 import passageiroService from '@/services/passageiroService';
-
-// Interfaces para tipar os dados
-interface LatLng {
-  lat: number;
-  lng: number;
-}
-
-interface PolylineOptions {
-  strokeColor: string;
-  strokeWeight: number;
-  strokeOpacity: number;
-  zIndex: number;
-}
-
-// Interface ajustada para usar path decodificado
-interface RotaPassageiro {
-  path: LatLng[]; // Alterado de string para LatLng[]
-  options: PolylineOptions;
-  passageiroId: string;
-}
-
-interface PointMarker {
-  position: LatLng;
-  title: string;
-  type: 'embarque' | 'destino' | 'inicio';
-  key: string; // Adicionado para garantir chave única no v-for
-}
+import type { RotaPassageiro, PointMarker, LatLng, PolylineOptions } from '@/interfaces/IRotaPassageiro';
 
 const route = useRoute();
 const router = useRouter();
