@@ -5,6 +5,7 @@ import { userAuthStore } from '@/store/auth';
 import viagemService from '@/services/viagemService';
 import motoristaService from '@/services/motoristaService';
 import type Viagem from '@/interfaces/IViagem';
+import passageiroService from '@/services/passageiroService';
 
 const authStore = userAuthStore();
 const router = useRouter();
@@ -26,10 +27,28 @@ async function carregarViagens() {
         
         if (Array.isArray(viagensData)) {
             // Processar cada viagem
-            const viagensProcessadas = [];
+            const viagensProcessadas:Viagem[] = [];
 
             for (const viagem of viagensData) {
-                // Buscar nome do motorista        
+              const detalhesPassageiros: string[] = [];
+              const iterador:string[] = Object.values(viagem.passageirosIds);
+              console.log(viagem.passageirosIds);
+              console.log(iterador);
+        
+              // Procurar nome dos passageiros para cada id
+              for (let i = 0;i < iterador.length; i++) {
+                const p:string = iterador[i];
+                console.log(p);
+                try {
+                  const res = await passageiroService.getById(p);
+                  if (res.data?.nome) {
+                    detalhesPassageiros.push(res.data.nome);
+                  }
+                } catch (err) {
+                  console.error('Erro ao buscar passageiro', p, err);
+                }
+              }
+
                 viagensProcessadas.push({
                     ...viagem,
                 });
@@ -116,10 +135,10 @@ onMounted(async () => {
         </div>
         
         <div class="viagem-info">
-          <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
+          <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>          
           <p><strong>Passageiros:</strong>
-            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro.id">
-            - {{ passageiro.nome }}
+            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro">
+            - {{ passageiro }}
             </p>
           </p>
           

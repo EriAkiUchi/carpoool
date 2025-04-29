@@ -5,6 +5,7 @@ import { userAuthStore } from '@/store/auth';
 import viagemService from '@/services/viagemService';
 import motoristaService from '@/services/motoristaService';
 import type Viagem from '@/interfaces/IViagem';
+import passageiroService from '@/services/passageiroService';
 
 const authStore = userAuthStore();
 const router = useRouter();
@@ -26,23 +27,40 @@ async function carregarViagens() {
     
     if (Array.isArray(viagensData)) {
       // Processar cada viagem
-      const viagensProcessadas = [];
+      const viagensProcessadas:Viagem[] = [];
       
       for (const viagem of viagensData) {
         // Buscar nome do motorista
-        let motoristaNome = 'Motorista não encontrado';
+        let nomeMotorista = 'Motorista não encontrado';
         try {
           const motoristaResponse = await motoristaService.getById(viagem.motoristaId);
           if (motoristaResponse.data && motoristaResponse.data.nome) {
-            motoristaNome = motoristaResponse.data.nome;
+            nomeMotorista = motoristaResponse.data.nome;
           }
         } catch (err) {
           console.error('Erro ao buscar motorista:', err);
         }
-        
+
+        const detalhesPassageiros: string[] = [];
+        const iterador:string[] = Object.values(viagem.passageirosIds);
+
+        // Procurar nome dos passageiros para cada id
+        for (let i = 0;i < iterador.length; i++) {
+          const p:string = iterador[i];
+          try {
+            const res = await passageiroService.getById(p);
+            if (res.data?.nome) {
+              detalhesPassageiros.push(res.data.nome);
+            }
+          } catch (err) {
+            console.error('Erro ao buscar passageiro', p, err);
+          }
+        }
+                
         viagensProcessadas.push({
           ...viagem,
-          motoristaNome,          
+          nomeMotorista,
+          passageirosIds: detalhesPassageiros,
         });
       }
       
@@ -126,7 +144,12 @@ onMounted(async () => {
         
         <div class="viagem-info">
           <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
-          <p><strong>Motorista:</strong> {{ viagem.motoristaNome }}</p>
+          <p><strong>Motorista:</strong> {{ viagem.nomeMotorista }}</p>
+          <p><strong>Passageiros:</strong>
+            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro">
+            - {{ passageiro }}
+            </p>
+          </p>
         </div>
         
         <div class="viagem-acoes">
