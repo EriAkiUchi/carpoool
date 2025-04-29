@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { userAuthStore } from '@/store/auth';
 
 import viagemService from '@/services/viagemService';
-import calculoMotoristasProximosService from '@/services/calculoMotoristasProximos';
+import calculoMotoristasProximosService from '@/services/calculoMotoristasProximosService';
 import type Viagem from '@/interfaces/IViagem';
 import type MotoristasProximos from '@/interfaces/IMotoristasProximos';
 
@@ -45,7 +45,6 @@ async function buscar() {
     motoristasProximos.value = await obterMotoristasProximos(passageiroId, distanciaMaxima.value);
 
     motoristasIds.value = motoristasProximos.value.map((motorista) => motorista.id);
-    console.log(motoristasIds.value);
 
     if (motoristasIds.value.length > 0) {
         viagens.value = await obterViagensEspecificas(motoristasIds.value);
@@ -58,6 +57,10 @@ async function buscar() {
         error.value = 'Nenhuma viagem encontrada.';
     }
     loading.value = false;
+}
+
+async function solicitarViagem(id: string) {
+
 }
 </script>
 
@@ -72,13 +75,38 @@ async function buscar() {
 
         <div v-if="loading">Carregando...</div>
         <div v-else-if="error" class="error">{{ error }}</div>
-        <ul v-else>
-            <li v-for="viagem in viagens" :key="viagem.id">
-                <h3>Motorista: {{ viagem.nomeMotorista }}</h3>
-                <p>Hora: {{ viagem.horarioDeSaida }}</p>
-                <p>Vagas: {{ viagem.vagasRestantes }}</p>
+        <ul v-else class="viagens-container">
+            <li v-for="viagem in viagens" :key="viagem.id" class="viagem-item">
+                <div class="viagem-header">
+                    <h3>Viagem para {{ viagem.nomeEmpresa }}</h3>                    
+                </div>
+            
+                <div class="viagem-info">
+                    <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
+                    <p><strong>Motorista:</strong> {{ viagem.nomeMotorista }}</p>
+                    <p><strong>Vagas restantes:</strong> {{ viagem.vagasRestantes }}</p>
+                    <div v-if="viagem.passageirosIds.length > 0">
+                      <p><strong>Passageiros:</strong></p>
+                      <ul>
+                          <li v-for="passageiro in viagem.passageirosIds" :key="passageiro">
+                              - {{ passageiro }}
+                          </li>
+                      </ul>
+                    </div>
+                </div>
+                
+                <button 
+                    v-if="viagem.status === 'em-andamento'"
+                    @click="solicitarViagem(viagem.id)"
+                    class="btn-solicitacao">
+                    Solicitar Carona
+                </button>
             </li>
         </ul>
+
+        <div class="back-link">
+            <router-link to="/passageiro" class="btn-voltar">Voltar ao Dashboard</router-link>
+        </div>
     </section>    
 </template>
 
@@ -97,5 +125,110 @@ async function buscar() {
 
 .error {
     color: red;
+}
+
+.viagens-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  list-style-type: none;
+}
+
+.viagem-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.viagem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.viagem-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #336699;
+}
+
+.viagem-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.viagem-status.em-andamento {
+  background-color: #3498db;
+  color: white;
+}
+
+.viagem-status.finalizada {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.viagem-status.cancelada {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.viagem-info {
+  border-top: 1px solid #336699;
+  border-bottom: 1px solid #336699;
+  padding: 0.75rem 0;
+  margin: 0.75rem 0;
+}
+
+.viagem-info p {
+  color: #336699;
+  margin: 0.5rem 0;
+}
+
+.viagem-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.viagem-item {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #336699;
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.btn-voltar {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-voltar {
+  background-color: #336699;
+  color: white;
+  margin-top: 2rem;
+}
+
+.btn-voltar:hover {
+  background-color: #264d73;
 }
 </style>
