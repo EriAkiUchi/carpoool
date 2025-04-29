@@ -51,7 +51,16 @@ class ViagemController {
             // const viagensSnapshot = await viagensRef.where('motoristaId', 'in', motoristasIds).get();
             for (let i = 0; i < motoristasIds.length; i++) {
                 const motoristaId = motoristasIds[i];
-                const viagensSnapshot = await viagensRef.where('motoristaId', '==', motoristaId).get();
+                //criei "indice" composta no Firestore para fazer esta consulta
+                const viagensSnapshot = await viagensRef 
+                                            .where('motoristaId', '==', motoristaId)
+                                            .where('vagasRestantes', '>', 0)
+                                            .where('status', '==', 'em-andamento')
+                                            .get();
+
+                if (viagensSnapshot.empty) {
+                    continue; // Se não houver viagens para esse motorista, continue para o próximo
+                }               
 
                 // Transformar os documentos do Firestore em objetos Viagem
                 const viagens = viagensSnapshot.docs.map(doc => Viagem.fromFirestore(doc));
