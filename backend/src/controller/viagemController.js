@@ -137,7 +137,7 @@ class ViagemController {
                 return { id: doc.id, ...viagem };
             });
 
-            //retornar o nome dos passageiros caso o usuário seja motorista
+            //retornar o ids dos passageiros caso o usuário seja motorista
             if(userType === 'motorista') {
                 //Para cada viagem, busca os detalhes dos passageiros
                 for (let i = 0; i < viagens.length; i++) {
@@ -148,10 +148,9 @@ class ViagemController {
                         for (const passageiroId of viagem.passageirosIds) {
                             const passageiroDoc = await firestore.collection('passageiros').doc(passageiroId).get();
                             if(passageiroDoc.exists) {
-                                passageirosData.push({
-                                    id: passageiroId,
-                                    nome: passageiroDoc.data().nome,
-                                });
+                                passageirosData.push(
+                                    passageiroId
+                                );
                             } 
                             else {
                                 return res.status(404).json({ message: 'Passageiro não encontrado na viagem' });
