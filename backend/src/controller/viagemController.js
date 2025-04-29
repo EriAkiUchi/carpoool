@@ -27,30 +27,46 @@ class ViagemController {
     }
 
     static async getViagensEspecificas(req, res, firestore) {
-        const { viagensIds } = req.params;
-
-        // Verifica se o parâmetro viagensIds está presente e não é vazio
-        if (!viagensIds || viagensIds.trim() === '') {
-            return res.status(400).json({ message: 'Parâmetro viagensIds não fornecido ou vazio' });
-        }
-
-        // Divide a string em um array de IDs
-        // e remove espaços em branco extras
-        const ids = viagensIds.split(',');
         try {
+            
+            let { motoristasIds } = req.query;
+
+            // Verifica se o parâmetro viagensIds está presente e não é vazio
+            if (!motoristasIds || motoristasIds.trim() === '') {
+                return res.status(400).json({ message: 'Parâmetro viagensIds não fornecido ou vazio' });
+            }
+
+            if(typeof motoristasIds === 'string') {
+                //Divide a string em um array
+                motoristasIds = motoristasIds.split(',').map(id => id.trim());
+            }
+            if (!Array.isArray(motoristasIds)) {
+                return res.status(400).json({ message: 'Parâmetro viagensIds deve ser uma string ou um array' });
+            }
+            
             const viagensRef = firestore.collection('viagens');
+            const viagensEncontradas = [];
+            // Busca as viagens onde o motoristaId está na lista de motoristasIds
+            // O operador 'in' permite buscar documentos onde o campo especificado está em uma lista de valores
+            // const viagensSnapshot = await viagensRef.where('motoristaId', 'in', motoristasIds).get();
+            for (let i = 0; i < motoristasIds.length; i++) {
+                const motoristaId = motoristasIds[i];
+                const viagensSnapshot = await viagensRef.where('motoristaId', '==', motoristaId).get();
 
-            // Busca as viagens com os IDs fornecidos
-            // Usando FieldPath.documentId() para buscar documentos por ID
-            const viagensSnapshot = await viagensRef.where(firestore.FieldPath.documentId(), 'in', ids).get();
+                // Transformar os documentos do Firestore em objetos Viagem
+                const viagens = viagensSnapshot.docs.map(doc => Viagem.fromFirestore(doc));
 
-            if (viagensSnapshot.empty) {
+                if (viagens.length > 0) {
+                    viagensEncontradas.push(...viagens);
+                }
+            }
+
+            if (viagensEncontradas.empty) {
                 return res.status(404).json({ message: 'Nenhuma viagem encontrada' });
             }
 
             // Convertendo os documentos do Firestore para objetos Viagem
-            const viagens = viagensSnapshot.docs.map(doc => Viagem.fromFirestore(doc));
-            res.status(200).json(viagens);
+            res.status(200).json(viagensEncontradas);
 
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar as viagens: ' + erro });
@@ -191,8 +207,8 @@ class ViagemController {
      */
     static async createViagem(req, res, firestore) {
         try {
-            const { motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida } = req.body;
-            const viagem = new Viagem(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida);
+            const { motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista } = req.body;
+            const viagem = new Viagem(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista);
 
             // Salvando a viagem no Firestore
             const docRef = await firestore.collection('viagens').add(viagem.toFirestore());

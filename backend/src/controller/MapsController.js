@@ -285,7 +285,7 @@ class MapsController {
                 }
             }
 
-            res.status(200).json({ ...motoristasMaisProximos });
+            res.status(200).json(motoristasMaisProximos);
 
         } catch (erro) {
             res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });

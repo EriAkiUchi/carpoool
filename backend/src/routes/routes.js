@@ -31,10 +31,10 @@ const routes = (app, firestore) => {
 
     app.get('/passageiros/:id', async (req, res) => PassageiroController.getPassageiroId(req, res, req.app.locals.firestore));
     app.get('/motoristas/:id', async (req, res) => MotoristaController.getMotoristaId(req, res, req.app.locals.firestore));
-    app.get('/carros/:id', async (req, res) => CarroController.getCarroId(req, res, req.app.locals.firestore));
+    app.get(`/carros/:id`, async (req, res) => CarroController.getCarroId(req, res, req.app.locals.firestore));
     app.get(`/viagens/:userType/:id`, async (req, res) => ViagemController.getViagensByUserId(req, res, req.app.locals.firestore));
-    app.get('/viagens/:id', async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
-    app.get('/viagens/:viagensIds', async (req, res) => ViagemController.getViagensByIds(req, res, req.app.locals.firestore));
+    app.get('/viagens/motoristas-mais-proximos', async (req, res) => ViagemController.getViagensEspecificas(req, res, req.app.locals.firestore));
+    app.get(`/viagens/:id`, async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
 
     app.post('/passageiros', async (req, res) => PassageiroController.createPassageiro(req, res, req.app.locals.firestore));
     app.post('/motoristas', async (req, res) => MotoristaController.createMotorista(req, res, req.app.locals.firestore));

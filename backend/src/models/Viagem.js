@@ -2,9 +2,9 @@ import MapsController from "../controller/MapsController.js";
 import admin from 'firebase-admin';
 
 class Viagem {
-    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida,  passageirosIds = [], status = 'em andamento', rotaDeViagem = "") {
-        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId) {
-            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId})) {
+    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista, passageirosIds = [], status = 'em andamento', rotaDeViagem = "") {
+        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId || !nomeMotorista) {
+            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId, nomeMotorista})) {
                 if(!value) {
                     throw new Error(`O campo ${key} é obrigatório`);
                 }
@@ -23,6 +23,7 @@ class Viagem {
         this.horarioDeSaida = this.processarHorarioDeSaida(horarioDeSaida); // Converte para o formato Date do Firestore
         this.status = status;
         this.rotaDeViagem = rotaDeViagem; // id de uma rota de viagem ou null
+        this.nomeMotorista = nomeMotorista; // Nome do motorista
     }
 
     processarHorarioDeSaida(horarioDeSaida) {
@@ -55,6 +56,7 @@ class Viagem {
             horarioDeSaida: this.horarioDeSaida,
             status: this.status,
             rotaDeViagem: this.rotaDeViagem, // id de uma rota de viagem ou null
+            nomeMotorista: this.nomeMotorista, // Nome do motorista
         };
     }
 
@@ -77,6 +79,7 @@ class Viagem {
             horarioDeSaida: data.horarioDeSaida,
             status: data.status,
             rotaDeViagem: data.rotaDeViagem, // id de uma rota de viagem ou null
+            nomeMotorista: data.nomeMotorista, // Nome do motorista
         }
     }
 }
