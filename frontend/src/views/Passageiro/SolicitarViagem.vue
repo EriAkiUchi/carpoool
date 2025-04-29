@@ -7,6 +7,7 @@ import viagemService from '@/services/viagemService';
 import calculoMotoristasProximosService from '@/services/calculoMotoristasProximosService';
 import type Viagem from '@/interfaces/IViagem';
 import type MotoristasProximos from '@/interfaces/IMotoristasProximos';
+import passageiroService from '@/services/passageiroService';
 
 const route = useRoute();
 const authStore = userAuthStore();
@@ -33,9 +34,32 @@ async function obterMotoristasProximos (passageiroId: string, distanciaMaxima: n
 }
 
 async function obterViagensEspecificas (motoristasIds: string[]): Promise<Viagem[]> {
-    const motoristas = await viagemService.getViagensEspecificas(motoristasIds)
-        
-    return motoristas;
+    const viagensFiltradas = await viagemService.getViagensEspecificas(motoristasIds)
+    const viagensProcessadas:Viagem[] = [];
+
+    for (const viagem of viagensFiltradas) {
+      const detalhesPassageiros: string[] = [];
+        const iterador:string[] = Object.values(viagem.passageirosIds);
+
+        // Procurar nome dos passageiros para cada id
+        for (let i = 0;i < iterador.length; i++) {
+          const p:string = iterador[i];
+          try {
+            const res = await passageiroService.getById(p);
+            if (res.data?.nome) {
+              detalhesPassageiros.push(res.data.nome);
+            }
+          } catch (err) {
+            console.error('Erro ao buscar passageiro', p, err);
+          }
+        }
+                
+        viagensProcessadas.push({
+          ...viagem,
+          passageirosIds: detalhesPassageiros,
+        });
+    }
+    return viagensProcessadas;
 }
 
 async function buscar() {
@@ -89,9 +113,12 @@ async function solicitarViagem(id: string) {
                       <p><strong>Passageiros:</strong></p>
                       <ul>
                           <li v-for="passageiro in viagem.passageirosIds" :key="passageiro">
-                              - {{ passageiro }}
+                              {{ passageiro }}
                           </li>
                       </ul>
+                    </div>
+                    <div v-else>
+                      <p><strong>Passageiros: Ainda não há passageiros</strong></p>
                     </div>
                 </div>
                 
