@@ -53,7 +53,7 @@ const routes = (app, firestore) => {
     app.delete('/carros/:id', async (req, res) => CarroController.deleteCarro(req, res, req.app.locals.firestore));
     app.delete(`/viagens/:id`, async (req, res) => ViagemController.deleteViagem(req, res, req.app.locals.firestore));
 
-    app.get('/maps/distancia/:passageiroId', async (req, res) => MapsController.calcularMotoristaMaixProximo(req, res, req.app.locals.firestore));
+    app.get('/maps/distancia/:passageiroId', async (req, res) => MapsController.calcularMotoristaMaisProximo(req, res, req.app.locals.firestore));
     app.get('/maps/rota/:id', async (req, res) => MapsController.getRotaId(req, res, req.app.locals.firestore));
     // app.get('/maps/rota/passageiro/:passageiroId', async (req, res) => MapsController.getRotasUsuarioId(req, res, req.app.locals.firestore));
     // app.post('/maps/rota/calcular-viagem', async (req, res) => MapsController.calcularRotaViagem(req, res, req.app.locals.firestore, null));

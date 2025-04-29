@@ -243,7 +243,7 @@ class MapsController {
      *        description: Erro em calcular o motorista mais próximo
      */
 
-    static async calcularMotoristaMaixProximo(req, res, firestore) {
+    static async calcularMotoristaMaisProximo(req, res, firestore) {
         try {
             const { passageiroId } = req.params;
             const { distanciaMaxima } = req.query; //distancia máxima em metros
