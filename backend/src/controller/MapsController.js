@@ -278,7 +278,7 @@ class MapsController {
                     }
                     motoristasMaisProximos.push(objMotorista);
                     motoristasMaisProximos = quickSort(motoristasMaisProximos); // ordena o array de motoristas mais próximos
-                    if(motoristasMaisProximos.length > 5) { // limita o array a 5 motoristas mais próximos
+                    if(motoristasMaisProximos.length > 7) { // limita o array a 7 motoristas mais próximos
                         motoristasMaisProximos.pop();
                     }
                     distanciaMinima = motoristasMaisProximos[motoristasMaisProximos.length - 1].distancia; // atualiza a distância mínima
