@@ -18,7 +18,7 @@ interface Passageiros {
 export default interface Viagem {
   id: string;
   motoristaId: string;
-  motoristaNome?: string;
+  nomeMotorista?: string;
   nomeEmpresa: string;
   passageirosIds: Passageiros[];
   enderecoDestino: Endereco;

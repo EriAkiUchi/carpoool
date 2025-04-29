@@ -1,4 +1,5 @@
 import api from '@/config/axios';
+import type Viagem from '@/interfaces/IViagem';
 
 class ViagemService {
 
@@ -8,17 +9,18 @@ class ViagemService {
         return resposta.data;
     }
 
-    async getViagensEspecificas(viagensIds: string[]) {
+    async getViagensEspecificas(motoristasIds: string[]): Promise<Viagem[]> {
         try {
-            const resposta = await api.get('maps/rotas', {
+            const resposta = await api.get('viagens/motoristas-mais-proximos', {
                 params: {
-                    viagensIds
+                    // Passando os IDs como uma string separada por vírgulas
+                    motoristasIds: motoristasIds.join(',')
                 }
             });
             return resposta.data;
         } catch (error) {
             console.error('Erro ao buscar viagens:', error);
-            return null;
+            return [];
         }
 
     }

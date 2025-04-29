@@ -13,33 +13,29 @@ const authStore = userAuthStore();
 const passageiroId = authStore.user?.id as string;
 
 const distanciaMaxima = ref<number>(0);
-const motoristasProximos = ref<MotoristasProximos>();
+const motoristasProximos = ref<MotoristasProximos[]>([]);
 const motoristasIds = ref<string[]>([]);
 const viagens = ref<Viagem[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
 async function obterMotoristasProximos (passageiroId: string, distanciaMaxima: number) {
-    const motoristas = await calculoMotoristasProximosService.getMotoristasProximos(passageiroId, distanciaMaxima);
-    if (motoristas.status === 200) {
-        console.log('Motoristas próximos:', motoristas.data);
-        return motoristas.data;
-    } else {
-        console.error('Erro ao obter motoristas próximos:', motoristas.statusText);
+    const motoristas: MotoristasProximos[] = await calculoMotoristasProximosService.getMotoristasProximos(passageiroId, distanciaMaxima);
+    if(!motoristas) {
+        console.error('Erro ao obter motoristas próximos:', motoristas);
         return [];
+    }
+    else 
+    {
+        return motoristas;
     }
         
 }
 
 async function obterViagensEspecificas (motoristasIds: string[]): Promise<Viagem[]> {
-    return await viagemService.getViagensEspecificas(motoristasIds)
-        .then((response) => {
-            return response.data;
-        })
-        .catch((error) => {
-            console.error('Erro ao obter viagens:', error);
-            return [];
-        });
+    const motoristas = await viagemService.getViagensEspecificas(motoristasIds)
+        
+    return motoristas;
 }
 
 async function buscar() {
@@ -47,12 +43,15 @@ async function buscar() {
     error.value = null;
     viagens.value = [];
     motoristasProximos.value = await obterMotoristasProximos(passageiroId, distanciaMaxima.value);
-    console.log('Motoristas próximos:', motoristasProximos.value);
 
-    motoristasIds.value = motoristasProximos.value.(motorista => motorista.id);
+    motoristasIds.value = motoristasProximos.value.map((motorista) => motorista.id);
+    console.log(motoristasIds.value);
 
     if (motoristasIds.value.length > 0) {
         viagens.value = await obterViagensEspecificas(motoristasIds.value);
+    }
+    else {
+        error.value = 'Nenhum motorista encontrado.';
     }
 
     if (viagens.value.length === 0) {
@@ -75,7 +74,7 @@ async function buscar() {
         <div v-else-if="error" class="error">{{ error }}</div>
         <ul v-else>
             <li v-for="viagem in viagens" :key="viagem.id">
-                <h3>Motorista: {{ viagem.motoristaNome }}</h3>
+                <h3>Motorista: {{ viagem.nomeMotorista }}</h3>
                 <p>Hora: {{ viagem.horarioDeSaida }}</p>
                 <p>Vagas: {{ viagem.vagasRestantes }}</p>
             </li>

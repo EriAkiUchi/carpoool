@@ -10,7 +10,6 @@ class CalculoMotoristasProximosService {
                     distanciaMaxima: distancia,
                 }
             });
-            console.log('Motoristas próximos:', resposta.data);
             return resposta.data;
         } catch (error) {
             console.error('Erro ao buscar motoristas próximos:', error);
