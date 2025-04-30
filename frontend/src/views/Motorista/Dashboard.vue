@@ -36,7 +36,7 @@ onMounted(() => {
             <div class="dashboard-card">
                 <h4>Oferecer carona</h4>
                 <p>Crie um novo anúncio de carona para passageiros.</p>
-                <button class="card-button">Criar anúncio</button>
+                <RouterLink to="/motorista/anunciar-carona" class="card-button">Anunciar Carona</RouterLink>
             </div>
 
             <section class="dashboard-card">
