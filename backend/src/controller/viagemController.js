@@ -217,8 +217,8 @@ class ViagemController {
      */
     static async createViagem(req, res, firestore) {
         try {
-            const { motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista } = req.body;
-            const viagem = new Viagem(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista);
+            const { motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista, carro } = req.body;
+            const viagem = new Viagem(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista, carro);
 
             // Salvando a viagem no Firestore
             const docRef = await firestore.collection('viagens').add(viagem.toFirestore());
