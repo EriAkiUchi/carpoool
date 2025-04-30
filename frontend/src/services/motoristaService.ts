@@ -8,8 +8,14 @@ class MotoristaService {
     }
 
     // Obter motorista por ID
-    async getById(id: string) {
-        return api.get(`/motoristas/${id}`);
+    async getById(id: string):Promise<Motorista> {
+        try {
+            const resultado = await api.get(`/motoristas/${id}`);
+            return resultado.data;
+        } catch (error) {
+            console.error('Erro ao buscar motorista:', error);
+            throw error;
+        }
     }
 
     // Criar motorista
