@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
 import { userAuthStore } from '@/store/auth';
 
 import viagemService from '@/services/viagemService';
@@ -9,7 +8,6 @@ import type Viagem from '@/interfaces/IViagem';
 import type MotoristasProximos from '@/interfaces/IMotoristasProximos';
 import passageiroService from '@/services/passageiroService';
 
-const route = useRoute();
 const authStore = userAuthStore();
 const passageiroId = authStore.user?.id as string;
 
@@ -85,21 +83,21 @@ async function buscar() {
 
 async function solicitarViagem(id: string) {
 
-  const viagem = await viagemService.getById(id);
-  const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
+	const viagem = await viagemService.getById(id);
+	const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
 
-  try {
-    const resposta = await viagemService.adicionarPassageiro(id, passageirosIdsAtualizado);
+	try {
+	const resposta = await viagemService.adicionarPassageiro(id, passageirosIdsAtualizado);
 
-    alert('Viagem solicitada com sucesso!');
+	alert('Viagem solicitada com sucesso!');
 
-    loading.value = true;
-    error.value = null;
-    await buscar(); // Atualiza a lista de viagens após a solicitação
+	loading.value = true;
+	error.value = null;
+	await buscar(); // Atualiza a lista de viagens após a solicitação
 
-  } catch (error) {
-    console.error('Erro ao solicitar viagem:', error);
-  }
+	} catch (error) {
+	console.error('Erro ao solicitar viagem:', error);
+	}
 
 }
 </script>
