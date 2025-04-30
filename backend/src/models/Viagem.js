@@ -2,9 +2,9 @@ import MapsController from "../controller/MapsController.js";
 import admin from 'firebase-admin';
 
 class Viagem {
-    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista, passageirosIds = [], status = 'em-andamento', rotaDeViagem = "") {
-        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId || !nomeMotorista) {
-            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId, nomeMotorista})) {
+    constructor(motoristaId, nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, nomeMotorista, carro, passageirosIds = [], status = 'em-andamento', rotaDeViagem = "") {
+        if(!nomeEmpresa || !enderecoDestino || !vagasRestantes || !horarioDeSaida || !motoristaId || !nomeMotorista || !carro) {
+            for (const [key, value] of Object.entries({nomeEmpresa, enderecoDestino, vagasRestantes, horarioDeSaida, motoristaId, nomeMotorista, carro})) {
                 if(!value) {
                     throw new Error(`O campo ${key} é obrigatório`);
                 }
@@ -23,7 +23,11 @@ class Viagem {
         this.horarioDeSaida = this.processarHorarioDeSaida(horarioDeSaida); // Converte para o formato Date do Firestore
         this.status = status;
         this.rotaDeViagem = rotaDeViagem; // id de uma rota de viagem ou null
-        this.nomeMotorista = nomeMotorista; // Nome do motorista
+        this.nomeMotorista = nomeMotorista;
+        this.carro = {
+            marca: carro.marca,
+            modelo: carro.modelo
+        }
     }
 
     processarHorarioDeSaida(horarioDeSaida) {
@@ -56,7 +60,11 @@ class Viagem {
             horarioDeSaida: this.horarioDeSaida,
             status: this.status,
             rotaDeViagem: this.rotaDeViagem, // id de uma rota de viagem ou null
-            nomeMotorista: this.nomeMotorista, // Nome do motorista
+            nomeMotorista: this.nomeMotorista,
+            carro: {
+                marca: this.carro.marca,
+                modelo: this.carro.modelo
+            }
         };
     }
 
@@ -79,7 +87,11 @@ class Viagem {
             horarioDeSaida: data.horarioDeSaida,
             status: data.status,
             rotaDeViagem: data.rotaDeViagem, // id de uma rota de viagem ou null
-            nomeMotorista: data.nomeMotorista, // Nome do motorista
+            nomeMotorista: data.nomeMotorista,
+            carro: {
+                marca: data.carro.marca,
+                modelo: data.carro.modelo
+            }
         }
     }
 }

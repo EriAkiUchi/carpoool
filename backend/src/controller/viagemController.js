@@ -282,7 +282,7 @@ class ViagemController {
                 return res.status(404).json({ message: 'Viagem não encontrada' });
             }
     
-            const { horarioDeSaida, passageirosIds, status } = req.body;
+            const { horarioDeSaida, passageirosIds, status, carro } = req.body;
             const existingData = docSnap.data();
     
             if (existingData.status === 'finalizada' || existingData.status === 'cancelada') {
@@ -294,6 +294,9 @@ class ViagemController {
                 
             if (horarioDeSaida) updatedFields.horarioDeSaida = horarioDeSaida;
             if (status) updatedFields.status = status;
+            if (carro) {
+                updatedFields.carro = {...carro};
+            }
 
             //array vazio de passageirosIds
             if (!passageirosIds) { 
