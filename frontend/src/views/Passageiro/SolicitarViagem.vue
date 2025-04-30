@@ -108,6 +108,7 @@ async function solicitarViagem(id: string) {
                 <div class="viagem-info">
                     <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
                     <p><strong>Motorista:</strong> {{ viagem.nomeMotorista }}</p>
+                    <p><strong>Carro:</strong> {{ viagem.carro.marca }} - {{ viagem.carro.modelo }}</p>
                     <p><strong>Vagas restantes:</strong> {{ viagem.vagasRestantes }}</p>
                     <div v-if="viagem.passageirosIds.length > 0">
                       <p><strong>Passageiros:</strong></p>
