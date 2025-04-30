@@ -1,3 +1,5 @@
+import type { Carro } from "./ICarro";
+
 export interface Endereco {
   logradouro: string;
   numero: string;
@@ -8,11 +10,6 @@ export interface Endereco {
 export interface Rota {
   passageiroId: string;
   rota: any; // Objeto de rota do Google Maps
-}
-
-interface Carro {
-  modelo: string;
-  marca: string;
 }
 
 export default interface Viagem {
