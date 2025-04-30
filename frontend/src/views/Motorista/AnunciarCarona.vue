@@ -12,7 +12,33 @@ const motoristaId = ref(authStore.user?.id);
 
 <template>
     <h2>Criar anúncio</h2>
+    <p>Insira as informações necessárias.</p>
+    <form @submit.prevent="" class="formulario">
+        <div class="form-group">
+            <label for="input">
+                Vagas Disponíveis:
+            </label>
+            <input type="number" class="input">
+        </div>
+        <div class="form-group">
+            <label for="input">
+                Horário de saída:
+            </label>
+            <input type="time" class="input">
+        </div>
+        <div>
+            <label for="input">
+                Nome da empresa:
+            </label>
+            <input type="string" class="input">
+        </div>
 
+        <div class="field">
+            <button class="button" type="submit">
+                Criar Anúncio
+            </button>
+        </div>
+    </form>
     <div class="back-link">
       <router-link to="/motorista" class="btn-voltar">Voltar ao Dashboard</router-link>
     </div>
