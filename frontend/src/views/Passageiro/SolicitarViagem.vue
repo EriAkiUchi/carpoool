@@ -85,6 +85,22 @@ async function buscar() {
 
 async function solicitarViagem(id: string) {
 
+  const viagem = await viagemService.getById(id);
+  const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
+
+  try {
+    const resposta = await viagemService.updateViagem(id, passageirosIdsAtualizado);
+
+    alert('Viagem solicitada com sucesso!');
+
+    loading.value = true;
+    error.value = null;
+    await buscar(); // Atualiza a lista de viagens após a solicitação
+
+  } catch (error) {
+    console.error('Erro ao solicitar viagem:', error);
+  }
+
 }
 </script>
 
