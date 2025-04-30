@@ -34,7 +34,7 @@ async function obterMotoristasProximos (passageiroId: string, distanciaMaxima: n
 }
 
 async function obterViagensEspecificas (motoristasIds: string[]): Promise<Viagem[]> {
-    const viagensFiltradas = await viagemService.getViagensEspecificas(motoristasIds)
+    const viagensFiltradas = await viagemService.getViagensEspecificas(motoristasIds, passageiroId);
     const viagensProcessadas:Viagem[] = [];
 
     for (const viagem of viagensFiltradas) {

@@ -29,7 +29,7 @@ class ViagemController {
     static async getViagensEspecificas(req, res, firestore) {
         try {
             
-            let { motoristasIds } = req.query;
+            let { motoristasIds, passageiroId } = req.query;
 
             // Verifica se o parâmetro viagensIds está presente e não é vazio
             if (!motoristasIds || motoristasIds.trim() === '') {
@@ -52,18 +52,20 @@ class ViagemController {
             for (let i = 0; i < motoristasIds.length; i++) {
                 const motoristaId = motoristasIds[i];
                 //criei "indice" composta no Firestore para fazer esta consulta
-                const viagensSnapshot = await viagensRef 
+                const viagemSnapshot = await viagensRef 
                                             .where('motoristaId', '==', motoristaId)
                                             .where('vagasRestantes', '>', 0)
                                             .where('status', '==', 'em-andamento')
                                             .get();
 
-                if (viagensSnapshot.empty) {
+                if (viagemSnapshot.empty) {
                     continue; // Se não houver viagens para esse motorista, continue para o próximo
                 }               
 
-                // Transformar os documentos do Firestore em objetos Viagem
-                const viagens = viagensSnapshot.docs.map(doc => Viagem.fromFirestore(doc));
+                // Filtrar as viagens sem o passageiroId e transformar os documentos do Firestore em objetos Viagem
+                const viagens = viagemSnapshot.docs
+                                    .map(doc => Viagem.fromFirestore(doc))
+                                    .filter(viagem => !viagem.passageirosIds?.includes(passageiroId));
 
                 if (viagens.length > 0) {
                     viagensEncontradas.push(...viagens);

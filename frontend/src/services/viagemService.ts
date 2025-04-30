@@ -9,12 +9,13 @@ class ViagemService {
         return resposta.data;
     }
 
-    async getViagensEspecificas(motoristasIds: string[]): Promise<Viagem[]> {
+    async getViagensEspecificas(motoristasIds: string[], passageiroId: string): Promise<Viagem[]> {
         try {
             const resposta = await api.get('viagens/motoristas-mais-proximos', {
                 params: {
                     // Passando os IDs como uma string separada por vírgulas
-                    motoristasIds: motoristasIds.join(',')
+                    motoristasIds: motoristasIds.join(','),
+                    passageiroId: passageiroId,
                 }
             });
             return resposta.data;
