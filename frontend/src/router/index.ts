@@ -79,7 +79,7 @@ const rotas: RouteRecordRaw[] = [
   {
     path: '/passageiro/solicitar-viagem',
     name: 'passageiro-solicitar-viagem',
-    component: () => import('../views/Passageiro/SolicitarViagem.vue'),
+    component: () => import('../views/Passageiro/SolicitarCarona.vue'),
     meta: { requiresAuth: true, role: 'passageiro' }
   }
 ];
