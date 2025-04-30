@@ -119,7 +119,6 @@ onMounted(async () => {
     
     <div v-else-if="viagens.length === 0" class="empty-state">
       <p>Você ainda não tem viagens agendadas.</p>
-      <router-link to="/motorista" class="btn-primary">Voltar ao Dashboard</router-link>
     </div>
     
     <div v-else class="viagens-container">
