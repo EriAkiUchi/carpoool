@@ -74,6 +74,20 @@ class ViagemService {
     async create(viagemData: any) {
         return api.post('maps/rotas', viagemData);
     }
+
+    async updateViagem(viagemId: string, passageirosIds: string[]) {
+        try {                        
+            // Atualiza a viagem com o novo passageiro
+            const resposta = await api.put(`viagens/${viagemId}`, {
+                passageirosIds: passageirosIds
+            });
+
+            return resposta.data;
+        } catch (error) {
+            console.error('Erro ao atualizar a viagem:', error);
+            throw error;
+        }
+    }
 }
 
 export default new ViagemService();
