@@ -1,9 +1,9 @@
 import admin from 'firebase-admin';
 
 class Motorista {
-    constructor(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, coordenadasOrigem, coordenadasDestino) {
-        if(!nome || !email || !senha || !enderecoOrigem || !enderecoDestino || !dataNascimento) {
-            for (const [key, value] of Object.entries({nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento})) {
+    constructor(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, coordenadasOrigem, coordenadasDestino, carro) {
+        if(!nome || !email || !senha || !enderecoOrigem || !enderecoDestino || !dataNascimento || !carro ) {
+            for (const [key, value] of Object.entries({nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, carro})) {
                 if(!value) {
                     throw new Error(`O campo ${key} é obrigatório`);
                 }
@@ -32,7 +32,11 @@ class Motorista {
         this.coordenadasDestino = {
             lat: coordenadasDestino.lat,
             lng: coordenadasDestino.lng
-        };   
+        };
+        this.carro = {
+            marca: carro.marca,
+            modelo: carro.modelo,
+        }
 
         // Converte a data de nascimento para o formato ISO antes de criar o objeto Date
         this.dataNascimento = this.processarDataNascimento(dataNascimento);
@@ -100,6 +104,10 @@ class Motorista {
             coordenadasDestino: {
                 lat: this.coordenadasDestino.lat,
                 lng: this.coordenadasDestino.lng
+            },
+            carro: {
+                marca: this.carro.marca,
+                modelo: this.carro.modelo,
             }
         };
     }
@@ -139,7 +147,11 @@ class Motorista {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'                
-            })
+            }),
+            carro: {
+                marca: data.carro.marca,
+                modelo: data.carro.modelo,
+            }
         }
     }
 }

@@ -134,7 +134,7 @@ class MotoristaController{
 
     static async createMotorista(req, res, firestore) {
         try {
-            const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero } = req.body;
+            const { nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimento, genero, carro } = req.body;
 
 
         // Parse dataNascimento to ensure Brazilian format (DD/MM/YYYY)
@@ -159,7 +159,7 @@ class MotoristaController{
 
             const coordenadasOrigem = await geocodeAddress(enderecoOrigem);
             const coordenadasDestino = await geocodeAddress(enderecoDestino);
-            const motorista = new Motorista(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimentoFormatada, genero, coordenadasOrigem, coordenadasDestino);
+            const motorista = new Motorista(nome, email, senha, enderecoOrigem, enderecoDestino, dataNascimentoFormatada, genero, coordenadasOrigem, coordenadasDestino, carro);
 
             // Salvando o motorista no Firestore
             const docRef = await firestore.collection('motoristas').add(motorista.toFirestore());
