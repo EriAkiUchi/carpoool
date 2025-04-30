@@ -71,8 +71,20 @@ class ViagemService {
 
 
     // Criar uma nova rota de viagem
-    async create(viagemData: any) {
-        return api.post('maps/rotas', viagemData);
+    async criarAnuncio(viagemData: any) {
+        try {
+            // Cria a viagem com os dados fornecidos
+            const resposta = await api.post('viagens', {
+                ...viagemData,
+                status: 'ativa' // Define o status inicial como 'ativa'
+            });
+
+            return resposta.data;
+
+        } catch (error) {
+            console.error('Erro ao criar a viagem:', error);
+            throw error;
+        }
     }
 
     async adicionarPassageiro(viagemId: string, passageirosIds: string[]) {
