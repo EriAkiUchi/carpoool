@@ -2,7 +2,7 @@ import type { Carro } from "./ICarro";
 import type { Endereco } from "./IEndereco";
 
 export interface Motorista {
-    id?: string;
+    id: string;
     nome: string;
     email: string;
     senha?: string;
@@ -10,5 +10,5 @@ export interface Motorista {
     enderecoDestino: Endereco;
     dataNascimento: string;
     genero?: string;
-    carros: Carro;
+    carro: Carro;
 }
