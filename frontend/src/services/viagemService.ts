@@ -75,7 +75,7 @@ class ViagemService {
         return api.post('maps/rotas', viagemData);
     }
 
-    async updateViagem(viagemId: string, passageirosIds: string[]) {
+    async adicionarPassageiro(viagemId: string, passageirosIds: string[]) {
         try {                        
             // Atualiza a viagem com o novo passageiro
             const resposta = await api.put(`viagens/${viagemId}`, {

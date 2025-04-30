@@ -89,7 +89,7 @@ async function solicitarViagem(id: string) {
   const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
 
   try {
-    const resposta = await viagemService.updateViagem(id, passageirosIdsAtualizado);
+    const resposta = await viagemService.adicionarPassageiro(id, passageirosIdsAtualizado);
 
     alert('Viagem solicitada com sucesso!');
 
