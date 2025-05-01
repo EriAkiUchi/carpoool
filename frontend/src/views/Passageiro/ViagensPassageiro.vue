@@ -34,8 +34,8 @@ async function carregarViagens() {
         let nomeMotorista = 'Motorista não encontrado';
         try {
           const motoristaResponse = await motoristaService.getById(viagem.motoristaId);
-          if (motoristaResponse.data && motoristaResponse.data.nome) {
-            nomeMotorista = motoristaResponse.data.nome;
+          if (motoristaResponse && motoristaResponse.nome) {
+            nomeMotorista = motoristaResponse.nome;
           }
         } catch (err) {
           console.error('Erro ao buscar motorista:', err);
@@ -145,9 +145,10 @@ onMounted(async () => {
           <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>
           <p><strong>Motorista:</strong> {{ viagem.nomeMotorista }}</p>
           <p><strong>Passageiros:</strong>
-            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro">
+            <p v-if="viagem.passageirosIds.length > 0" v-for="passageiro in viagem.passageirosIds" :key="passageiro">
             - {{ passageiro }}
             </p>
+            <p v-else>Ainda não há passageiros.</p>
           </p>
         </div>
         

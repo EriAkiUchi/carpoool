@@ -31,14 +31,11 @@ async function carregarViagens() {
 
             for (const viagem of viagensData) {
               const detalhesPassageiros: string[] = [];
-              const iterador:string[] = Object.values(viagem.passageirosIds);
-              console.log(viagem.passageirosIds);
-              console.log(iterador);
+              const iterador:string[] = Object.values(viagem.passageirosIds);              
         
               // Procurar nome dos passageiros para cada id
               for (let i = 0;i < iterador.length; i++) {
                 const p:string = iterador[i];
-                console.log(p);
                 try {
                   const res = await passageiroService.getById(p);
                   if (res.data?.nome) {
@@ -51,6 +48,7 @@ async function carregarViagens() {
 
                 viagensProcessadas.push({
                     ...viagem,
+                    passageirosIds: detalhesPassageiros,
                 });
             }
             
@@ -136,9 +134,10 @@ onMounted(async () => {
         <div class="viagem-info">
           <p><strong>Horário:</strong> {{ viagem.horarioDeSaida }}</p>          
           <p><strong>Passageiros:</strong>
-            <p v-for="passageiro in viagem.passageirosIds" :key="passageiro">
+            <p v-if="viagem.passageirosIds.length > 0" v-for="passageiro in viagem.passageirosIds" :key="passageiro">
             - {{ passageiro }}
             </p>
+            <p v-else>Ainda não há passageiros.</p>
           </p>
           
         </div>
