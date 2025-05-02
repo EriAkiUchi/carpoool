@@ -5,6 +5,7 @@ import CarroController from '../controller/carroController.js';
 import ViagemController from '../controller/viagemController.js';
 import MapsController from '../controller/MapsController.js';
 import AuthController from '../controller/authController.js';
+import SolicitacaoController from '../controller/solicitacaoController.js';
 import cors from 'cors';
 
 const routes = (app, firestore) => {
@@ -28,6 +29,7 @@ const routes = (app, firestore) => {
     app.get('/motoristas', async (req, res) => MotoristaController.getMotoristas(req, res, req.app.locals.firestore));
     app.get('/carros', async (req, res) => CarroController.getCarros(req, res, req.app.locals.firestore));
     app.get(`/viagens`, async (req, res) => ViagemController.getViagens(req, res, req.app.locals.firestore));
+    app.get('/motoristas/solicitacoes', async (req, res) => SolicitacaoController.getSolicitacoes(req, res, req.app.locals.firestore));
 
     app.get('/passageiros/:id', async (req, res) => PassageiroController.getPassageiroId(req, res, req.app.locals.firestore));
     app.get('/motoristas/:id', async (req, res) => MotoristaController.getMotoristaId(req, res, req.app.locals.firestore));
@@ -42,6 +44,7 @@ const routes = (app, firestore) => {
     app.post(`/viagens`, async (req, res) => ViagemController.createViagem(req, res, req.app.locals.firestore));
     app.post('/login/passageiro', async (req, res) => AuthController.loginPassageiro(req, res, req.app.locals.firestore));
     app.post('/login/motorista', async (req, res) => AuthController.loginMotorista(req, res, req.app.locals.firestore));
+    app.post('/motoristas/solicitacoes', async (req, res) => SolicitacaoController.createSolicitacao(req, res, req.app.locals.firestore));
 
     app.put('/passageiros/:id', async (req, res) => PassageiroController.updatePassageiro(req, res, req.app.locals.firestore));
     app.put('/motoristas/:id', async (req, res) => MotoristaController.updateMotorista(req, res, req.app.locals.firestore));
@@ -52,6 +55,7 @@ const routes = (app, firestore) => {
     app.delete('/motoristas/:id', async (req, res) => MotoristaController.deleteMotorista(req, res, req.app.locals.firestore));
     app.delete('/carros/:id', async (req, res) => CarroController.deleteCarro(req, res, req.app.locals.firestore));
     app.delete(`/viagens/:id`, async (req, res) => ViagemController.deleteViagem(req, res, req.app.locals.firestore));
+    app.delete('/motoristas/solicitacoes/:id', async (req, res) => SolicitacaoController.deleteSolicitacao(req, res, req.app.locals.firestore));
 
     app.get('/maps/distancia/:passageiroId', async (req, res) => MapsController.calcularMotoristaMaisProximo(req, res, req.app.locals.firestore));
     app.get('/maps/rota/:id', async (req, res) => MapsController.getRotaId(req, res, req.app.locals.firestore));
