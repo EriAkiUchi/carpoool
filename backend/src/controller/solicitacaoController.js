@@ -1,5 +1,5 @@
 import axios from "axios";
-import Solicitacao from "../models/Solicitacao";
+import Solicitacao from "../models/Solicitacao.js";
 
 class SolicitacaoController {
     static async getSolicitacoes(req, res, firestore) {
@@ -19,11 +19,29 @@ class SolicitacaoController {
         }
     }
 
+    static async getSolicitacaoId(req, res, firestore) {
+        try {
+            const { id } = req.params;
+            const solicitacaoRef = firestore.collection('solicitacoes').doc(id);
+            const snapshot = await solicitacaoRef.get();
+
+            if (snapshot.empty) {
+                return res.status(404).json({ message: "Nenhuma solicitação encontrada." });
+            }
+
+            const solicitacao = snapshot.docs.map(doc => Solicitacao.fromFirestore(doc));
+            res.status(200).json(solicitacao);
+        } catch (error) {
+            console.error("Erro ao buscar solicitação:", error);
+            res.status(500).json({ error: `Erro ao buscar solicitação: ${error}` });
+        }
+    }
+
     static async createSolicitacao(req, res, firestore) {
         try {
-            const { nomeEmpresa, nomePassageiro, enderecoOrigem, genero } = req.body;
+            const { idPassageiro, idViagem, nomeEmpresa, nomePassageiro, enderecoOrigem, genero } = req.body;
 
-            const novaSolicitacao = new Solicitacao(nomeEmpresa, nomePassageiro, enderecoOrigem, genero);
+            const novaSolicitacao = new Solicitacao(idPassageiro, idViagem, nomeEmpresa, nomePassageiro, enderecoOrigem, genero);
             const solicitacaoRef = await firestore.collection('solicitacoes').add(novaSolicitacao.toFirestore());
 
             res.status(201).json({ id: solicitacaoRef.id, ...novaSolicitacao });
@@ -52,3 +70,5 @@ class SolicitacaoController {
         }
     }
 }
+
+export default SolicitacaoController;

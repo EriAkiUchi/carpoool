@@ -1,10 +1,12 @@
 import admin from 'firebase-admin';
 
 class Solicitacao {
-    constructor(nomeEmpresa, nomePassageiro, enderecoOrigem, genero)  {
-        if(!nomeEmpresa || !nomePassageiro || !enderecoOrigem || !genero) {
+    constructor(idPassageiro, idViagem, nomeEmpresa, nomePassageiro, enderecoOrigem, genero)  {
+        if(!idPassageiro || !idViagem || !nomeEmpresa || !nomePassageiro || !enderecoOrigem || !genero) {
             throw new Error('Todos os campos são obrigatórios!');
         }
+        this.idPassageiro = idPassageiro;
+        this.idViagem = idViagem;
         this.nomeEmpresa = nomeEmpresa;
         this.nomePassageiro = nomePassageiro;
         this.enderecoOrigem = {
@@ -19,6 +21,8 @@ class Solicitacao {
 
     toFirestore() {
         return {
+            idPassageiro: this.idPassageiro,
+            idViagem: this.idViagem,
             nomeEmpresa: this.nomeEmpresa,
             nomePassageiro: this.nomePassageiro,
             enderecoOrigem: {
@@ -35,6 +39,8 @@ class Solicitacao {
         const data = snapshot.data();
         return {
             id: snapshot.id,
+            idPassageiro: data.idPassageiro,
+            idViagem: data.idViagem,
             nomeEmpresa: data.nomeEmpresa,
             nomePassageiro: data.nomePassageiro,
             enderecoOrigem: {
