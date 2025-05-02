@@ -8,5 +8,5 @@ export interface Passageiro {
     enderecoOrigem: Endereco;
     enderecoDestino: Endereco;
     dataNascimento: string;
-    genero?: string;
+    genero: string;
 }
