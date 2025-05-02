@@ -303,12 +303,12 @@ class ViagemController {
                 updatedFields.passageirosIds = existingData.passageirosIds;
             }
             // todos os passageiros cancelaram a viagem
-            else if(passageirosIds.length === 0 && existingData.passageirosIds.length > 0) {
-                await firestore.collection('rotas').doc(existingData.rotaDeViagem).delete();
-                updatedFields.rotaDeViagem = "";
-                updatedFields.passageirosIds = [];
-                updatedFields.vagasRestantes = existingData.vagasRestantes + 1;
-            }
+            // else if(passageirosIds.length === 0 && existingData.passageirosIds.length > 0) {
+            //     await firestore.collection('rotas').doc(existingData.rotaDeViagem).delete();
+            //     updatedFields.rotaDeViagem = "";
+            //     updatedFields.passageirosIds = [];
+            //     updatedFields.vagasRestantes = existingData.vagasRestantes + 1;
+            // }
             //atualizar ids dos passageiros e a rota
             else if (passageirosIds && existingData.passageirosIds.length > 0) { 
                 
