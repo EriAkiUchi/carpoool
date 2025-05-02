@@ -9,8 +9,14 @@ class PassageiroService {
     }
 
     // Obter passageiro por ID
-    async getById(id: string) {
-        return api.get(`/passageiros/${id}`);
+    async getById(id: string): Promise<Passageiro> {
+        try {
+            const response = await api.get(`/passageiros/${id}`);
+            return response.data;
+        }  catch (error) {
+            console.error('Error fetching passageiro:', error);
+            throw error;
+        }
     }
 
     // Criar passageiro
