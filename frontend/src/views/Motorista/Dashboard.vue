@@ -33,23 +33,33 @@ onMounted(() => {
         </section>
 
         <section class="dashboard-content">
+          <div class="dashboard-cards">
             <div class="dashboard-card">
                 <h4>Oferecer carona</h4>
                 <p>Crie um novo anúncio de carona para passageiros.</p>
                 <RouterLink to="/motorista/anunciar-carona" class="card-button">Anunciar Carona</RouterLink>
             </div>
 
-            <section class="dashboard-card">
+            <div class="dashboard-card">
                 <h4>Minhas Caronas</h4>
                 <p>Gerencie as suas caronas.</p>
                 <RouterLink to="/motorista/viagens" class="card-button">Ver caronas</RouterLink>
-            </section>
+            </div>
+
+          </div>
+          <div class="dashboard-cards">
+            <div class="dashboard-card">
+              <h4>Solicitações de Carona</h4>
+              <p>Aceite ou rejeite Solicitações de Carona.</p>
+              <RouterLink to="/motorista/solicitacoes" class="card-button">Ver Solicitações</RouterLink>
+            </div>
     
-            <section class="dashboard-card">
+            <div class="dashboard-card">
                 <h4>Meu Perfil</h4>
                 <p>Edite suas informações pessoais e preferências.</p>
                 <button class="card-button">Editar perfil</button>
-            </section>
+            </div>
+          </div>
         </section>
     </main>
 </template>
@@ -101,6 +111,13 @@ onMounted(() => {
   
   gap: 2rem;
   width: 100%;
+}
+
+.dashboard-cards {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
 }
 
 .dashboard-card {

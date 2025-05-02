@@ -87,6 +87,12 @@ const rotas: RouteRecordRaw[] = [
     name: 'motorista-anunciar-carona',
     component: () => import('../views/Motorista/AnunciarCarona.vue'),
     meta: { requiresAuth: true, role: 'motorista' }
+  },
+  {
+    path: '/motorista/solicitacoes',
+    name: 'motorista-solicitacoes',
+    component: () => import('../views/Motorista/Solicitacoes.vue'),
+    meta: { requiresAuth: true, role: 'motorista' }
   }
 ];
 
