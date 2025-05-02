@@ -37,7 +37,7 @@ const routes = (app, firestore) => {
     app.get(`/viagens/:userType/:id`, async (req, res) => ViagemController.getViagensByUserId(req, res, req.app.locals.firestore));
     app.get('/viagens/motoristas-mais-proximos', async (req, res) => ViagemController.getViagensEspecificas(req, res, req.app.locals.firestore));
     app.get(`/viagens/:id`, async (req, res) => ViagemController.getViagemId(req, res, req.app.locals.firestore));
-    app.get('/motoristas/solicitacoes/:id', async (req, res) => SolicitacaoController.getSolicitacaoId(req, res, req.app.locals.firestore));
+    app.get('/motoristas/solicitacoes/verificar', async (req, res) => SolicitacaoController.getSolicitacaoId(req, res, req.app.locals.firestore));
 
     app.post('/passageiros', async (req, res) => PassageiroController.createPassageiro(req, res, req.app.locals.firestore));
     app.post('/motoristas', async (req, res) => MotoristaController.createMotorista(req, res, req.app.locals.firestore));

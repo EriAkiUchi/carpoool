@@ -21,9 +21,12 @@ class SolicitacaoController {
 
     static async getSolicitacaoId(req, res, firestore) {
         try {
-            const { id } = req.params;
-            const solicitacaoRef = firestore.collection('solicitacoes').doc(id);
-            const snapshot = await solicitacaoRef.get();
+            const { idPassageiro, idViagem } = req.query;
+            const solicitacaoRef = firestore.collection('solicitacoes');
+            const snapshot = await solicitacaoRef
+                                    .where('idPassageiro', '==', idPassageiro)  
+                                    .where('idViagem', '==', idViagem)
+                                    .get();
 
             if (snapshot.empty) {
                 return res.status(404).json({ message: "Nenhuma solicitação encontrada." });
