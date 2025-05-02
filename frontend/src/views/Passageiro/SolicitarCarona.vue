@@ -7,6 +7,9 @@ import calculoMotoristasProximosService from '@/services/calculoMotoristasProxim
 import type Viagem from '@/interfaces/IViagem';
 import type MotoristasProximos from '@/interfaces/IMotoristasProximos';
 import passageiroService from '@/services/passageiroService';
+import solicitacaoService from '@/services/solicitacaoService';
+import type { Solicitacao } from '@/interfaces/ISolicitacao';
+import type { Passageiro } from '@/interfaces/IPassageiro';
 
 const authStore = userAuthStore();
 const passageiroId = authStore.user?.id as string;
@@ -44,8 +47,8 @@ async function obterViagensEspecificas (motoristasIds: string[]): Promise<Viagem
           const p:string = iterador[i];
           try {
             const res = await passageiroService.getById(p);
-            if (res.data?.nome) {
-              detalhesPassageiros.push(res.data.nome);
+            if (res.nome) {
+              detalhesPassageiros.push(res.nome);
             }
           } catch (err) {
             console.error('Erro ao buscar passageiro', p, err);
@@ -83,22 +86,49 @@ async function buscar() {
 
 async function solicitarViagem(id: string) {
 
-	const viagem = await viagemService.getById(id);
-	const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
+	const viagem:Viagem = await viagemService.getById(id);
 
-	try {
-	const resposta = await viagemService.adicionarPassageiro(id, passageirosIdsAtualizado);
+  const buscarSolicitacao = await solicitacaoService.getSolicitacaoByIds(passageiroId, viagem.id);
+	// const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
 
-	alert('Viagem solicitada com sucesso!');
+	// try {
+  //   const resposta = await viagemService.adicionarPassageiro(id, passageirosIdsAtualizado);
 
-	loading.value = true;
-	error.value = null;
-	await buscar(); // Atualiza a lista de viagens após a solicitação
+  //   alert('Viagem solicitada com sucesso!');
 
-	} catch (error) {
-	console.error('Erro ao solicitar viagem:', error);
-	}
+  //   loading.value = true;
+  //   error.value = null;
+  //   await buscar(); // Atualiza a lista de viagens após a solicitação
 
+	// } catch (error) {
+	//   console.error('Erro ao solicitar viagem:', error);
+	// }
+
+  const passageiro:Passageiro = await passageiroService.getById(passageiroId);
+  console.log(passageiro);
+  const solicitarViagem = {
+    idPassageiro: passageiroId,
+    idViagem: id,
+    nomeEmpresa: viagem.nomeEmpresa,
+    nomePassageiro: passageiro.nome,
+    genero: passageiro.genero,
+    enderecoOrigem: {
+      logradouro: passageiro.enderecoOrigem.logradouro,
+      numero: passageiro.enderecoOrigem.numero,
+      bairro: passageiro.enderecoOrigem.bairro,
+      cidade: passageiro.enderecoOrigem.cidade,
+    }
+  }
+  console.log(solicitarViagem);
+
+  try {
+    const resposta = await solicitacaoService.createSolicitacao(solicitarViagem);
+    alert('Viagem solicitada com sucesso!');
+    
+    await buscar(); // Atualiza a lista de viagens após a solicitação
+  } catch (error) {
+    console.error('Erro ao solicitar viagem:', error);
+  }
 }
 </script>
 
