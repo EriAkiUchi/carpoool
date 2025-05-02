@@ -1,4 +1,4 @@
 export interface Carro {
-    cor: string;
+    modelo: string;
     marca: string;
 }
