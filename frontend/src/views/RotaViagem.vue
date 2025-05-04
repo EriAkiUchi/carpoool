@@ -7,12 +7,13 @@ import mapaRotaService from '@/services/mapaRotaService';
 import type Viagem from '@/interfaces/IViagem';
 import passageiroService from '@/services/passageiroService';
 import type { RotaPassageiro, PointMarker, LatLng, PolylineOptions } from '@/interfaces/IRotaPassageiro';
+import type { Passageiro } from '@/interfaces/IPassageiro';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = userAuthStore();
 const viagem = ref<Viagem | null>(null);
-const passageirosDetalhados = ref<{ id: string; nome: string }[]>([]);
+const passageirosDetalhados = ref<Passageiro[]>([]);
 const rota = ref<any | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
@@ -42,7 +43,7 @@ async function carregarViagem() {
   if (Array.isArray(viagemData.passageirosIds) && typeof viagemData.passageirosIds[0] === 'string') {
     passageirosDetalhados.value = await Promise.all(
       (viagemData.passageirosIds as string[]).map(id =>
-        passageiroService.getById(id).then(res => ({ id: res.data.id, nome: res.data.nome }))
+        passageiroService.getById(id)
       )
     );
   } else {
