@@ -35,6 +35,16 @@ class SolicitacaoService {
             throw error;
         }
     }
+
+    async deletarSolicitacao(solicitacaoId: string) {
+        try {
+            const response = await api.delete(`/motoristas/solicitacoes/${solicitacaoId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting solicitacao:', error);
+            throw error;
+        }
+    }
 }
 
 export default new SolicitacaoService();
