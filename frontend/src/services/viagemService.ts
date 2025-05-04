@@ -4,9 +4,15 @@ import type Viagem from '@/interfaces/IViagem';
 class ViagemService {
 
     //Obter rota pelo id
-    async getById(id: string) {
-        const resposta = await api.get(`viagens/${id}`);
-        return resposta.data;
+    async getById(id: string): Promise<Viagem> {
+        try {
+            const resposta = await api.get(`viagens/${id}`);
+
+            return resposta.data;
+        } catch (error) {
+            console.error('Erro ao buscar viagem:', error);
+            throw error;
+        }
     }
 
     async getViagensEspecificas(motoristasIds: string[], passageiroId: string): Promise<Viagem[]> {
