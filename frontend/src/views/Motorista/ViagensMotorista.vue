@@ -38,8 +38,8 @@ async function carregarViagens() {
                 const p:string = iterador[i];
                 try {
                   const res = await passageiroService.getById(p);
-                  if (res.data?.nome) {
-                    detalhesPassageiros.push(res.data.nome);
+                  if (res.nome) {
+                    detalhesPassageiros.push(res.nome);
                   }
                 } catch (err) {
                   console.error('Erro ao buscar passageiro', p, err);
