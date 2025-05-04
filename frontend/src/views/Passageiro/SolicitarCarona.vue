@@ -89,6 +89,10 @@ async function solicitarViagem(id: string) {
 	const viagem:Viagem = await viagemService.getById(id);
 
   const buscarSolicitacao = await solicitacaoService.getSolicitacaoByIds(passageiroId, viagem.id);
+  if(buscarSolicitacao) {
+    alert('Você já solicitou essa viagem!');
+    return;
+  }
 	// const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
 
 	// try {
@@ -119,7 +123,6 @@ async function solicitarViagem(id: string) {
       cidade: passageiro.enderecoOrigem.cidade,
     }
   }
-  console.log(solicitarViagem);
 
   try {
     const resposta = await solicitacaoService.createSolicitacao(solicitarViagem);
