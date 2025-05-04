@@ -1,10 +1,10 @@
 import type { Endereco } from "./IEndereco";
 
 export interface Passageiro {
-    id?: string;
+    id: string;
     nome: string;
     email: string;
-    senha?: string;
+    senha: string;
     enderecoOrigem: Endereco;
     enderecoDestino: Endereco;
     dataNascimento: string;
