@@ -49,9 +49,9 @@ async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passa
     const viagem:Viagem = await viagemService.getById(viagemId);
 
     if (aceitar) {
-        const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
+      const passageirosIdsAtualizado = [...viagem.passageirosIds, passageiroId];
 
-        try {
+      try {
         const resposta = await viagemService.adicionarPassageiro(viagem.id, passageirosIdsAtualizado);
 
         if(resposta) {
@@ -66,12 +66,33 @@ async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passa
         error.value = null;
         await carregarSolicitacoes(); // Atualiza a lista de viagens após a solicitação
 
-            } catch (error) {
-            console.error('Erro ao solicitar viagem:', error);
-            }
+      } catch (error) {
+        console.error('Erro ao solicitar viagem:', error);
+      }
+      finally {
+          isLoading.value = false;
+          error.value = null;
+      }
     } 
     else {
-
+      try {
+          const respostaDelecao = await solicitacaoService.deletarSolicitacao(idSolicitacao);
+          if(respostaDelecao) {
+              alert('Solicitação recusada com sucesso!');
+          }
+          else {
+              alert('Erro ao recusar a solicitação.');
+          }
+          isLoading.value = true;
+          error.value = null;
+          await carregarSolicitacoes();
+      } catch (error) {
+          console.error('Erro ao recusar a solicitação:', error);
+      }
+      finally {
+          isLoading.value = false;
+          error.value = null;
+      }
     }
 }
 
@@ -85,11 +106,12 @@ async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passa
 
         <div v-else-if="error" class="error">
             {{ error }}
-            <button class="retry">Tentar novamente</button>
+            <button class="retry" @click="carregarSolicitacoes">Tentar novamente</button>
         </div>
 
         <div v-else-if="solicitacoes.length === 0" class="no-solicitacoes">
             Nenhuma solicitação encontrada.
+            <button class="retry" @click="carregarSolicitacoes">Tentar novamente</button>
         </div>
 
         <section class="solicitacoes-container">
