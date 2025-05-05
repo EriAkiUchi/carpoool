@@ -91,7 +91,7 @@ const rotas: RouteRecordRaw[] = [
   {
     path: '/motorista/solicitacoes',
     name: 'motorista-solicitacoes',
-    component: () => import('../views/Motorista/Solicitacoes.vue'),
+    component: () => import('../views/Motorista/GerenciarSolicitacoes.vue'),
     meta: { requiresAuth: true, role: 'motorista' }
   }
 ];
