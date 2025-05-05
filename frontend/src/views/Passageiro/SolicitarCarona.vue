@@ -85,11 +85,10 @@ async function buscar() {
 }
 
 async function solicitarViagem(id: string) {
-
 	const viagem:Viagem = await viagemService.getById(id);
 
-  const buscarSolicitacao = await solicitacaoService.getSolicitacaoByIds(passageiroId, viagem.id);
-  if(buscarSolicitacao) {
+  const buscarSolicitacao:Solicitacao = await solicitacaoService.getSolicitacaoByIds(passageiroId, viagem.id);
+  if(Object.values(buscarSolicitacao).length > 0) {
     alert('Você já solicitou essa viagem!');
     return;
   }
@@ -109,7 +108,6 @@ async function solicitarViagem(id: string) {
 	// }
 
   const passageiro:Passageiro = await passageiroService.getById(passageiroId);
-  console.log(passageiro);
   const solicitarViagem = {
     idPassageiro: passageiroId,
     idViagem: id,
