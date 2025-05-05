@@ -14,6 +14,7 @@ const isLoading = ref(true);
 const error = ref<string | null>(null);
 
 async function carregarSolicitacoes(){
+    solicitacoes.value = [];
     isLoading.value = true;
     error.value = null;
 
@@ -62,16 +63,10 @@ async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passa
             alert('Erro ao aceitar a solicitação.');
         }
         
-        isLoading.value = true;
-        error.value = null;
         await carregarSolicitacoes(); // Atualiza a lista de viagens após a solicitação
 
       } catch (error) {
         console.error('Erro ao solicitar viagem:', error);
-      }
-      finally {
-          isLoading.value = false;
-          error.value = null;
       }
     } 
     else {
@@ -83,15 +78,10 @@ async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passa
           else {
               alert('Erro ao recusar a solicitação.');
           }
-          isLoading.value = true;
-          error.value = null;
+
           await carregarSolicitacoes();
       } catch (error) {
           console.error('Erro ao recusar a solicitação:', error);
-      }
-      finally {
-          isLoading.value = false;
-          error.value = null;
       }
     }
 }
