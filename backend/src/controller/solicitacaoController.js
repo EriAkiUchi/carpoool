@@ -8,7 +8,7 @@ class SolicitacaoController {
             const snapshot = await solicitacoesRef.get();
 
             if (snapshot.empty) {
-                return res.status(404).json({ message: "Nenhuma solicitação encontrada." });
+                return res.status(200).json([]);
             }
 
             const solicitacoes = snapshot.docs.map(doc => Solicitacao.fromFirestore(doc));
