@@ -23,7 +23,7 @@ onMounted(() => {
 <template>
     <main class="dashboard-container">
         <section class="dashboard-header">
-            <h2>Pagina do Passageiro</h2>
+            <h2>Página do Passageiro</h2>
             <button @click.prevent="handleLogout" class="logout-button">Sair</button>
         </section>
 
@@ -117,6 +117,7 @@ onMounted(() => {
 
 .dashboard-card h4 {
   margin-bottom: 1rem;
+  font-size: 1.3rem;
   color: #336699;
 }
 
