@@ -274,10 +274,13 @@ const mapId = import.meta.env.VITE_MAP_ID;
     <div v-else class="viagem-detalhe-content">
       <div class="viagem-info-card">
         <h3>{{ viagem.nomeEmpresa }}</h3>
-        <div class="status-badge" :class="viagem.status">
+        <div  v-if="viagem.status === 'em-andamento'" class="status-badge" :class="viagem.status">
+          em andamento
+        </div>
+        <div v-else class="status-badge" :class="viagem.status">
           {{ viagem.status }}
         </div>
-        
+
         <div class="info-section">
           <h3>Informações da Viagem</h3>
           <p><strong>Horário de saída:</strong> {{ viagem.horarioDeSaida }}</p>
