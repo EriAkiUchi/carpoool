@@ -137,11 +137,13 @@ async function solicitarViagem(id: string) {
 
 <template>
     <section class="buscar-viagens">
-        <h2>Buscar viagens próximas</h2>
+        <h2 class="titulo">Buscar viagens próximas</h2>
         <div class="form-group">
-            <label>Distância Máxima (Km)</label>
-            <input type="number" v-model.number="distanciaMaxima" >
-            <button @click="buscar">Buscar</button>
+          <div>
+            <label class="form-label">Digite uma distância máxima de raio de busca em kilômetros(Km): </label>
+            <input class="form-input" type="number" v-model.number="distanciaMaxima" >
+          </div>
+            <button class="form-button" @click="buscar">Buscar</button>
         </div>
 
         <div v-if="loading">Carregando...</div>
@@ -173,7 +175,7 @@ async function solicitarViagem(id: string) {
                 <button 
                     v-if="viagem.status === 'em-andamento'"
                     @click="solicitarViagem(viagem.id)"
-                    class="btn-solicitacao">
+                    class="btn-solicitacao form-button">
                     Solicitar Carona
                 </button>
             </li>
@@ -191,11 +193,48 @@ async function solicitarViagem(id: string) {
     margin: auto;
 }
 
+.titulo{
+  padding-top: 2rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    
     margin-bottom: 1rem;
+    align-items: center;
+}
+
+.form-label {
+    font-size: 1.25rem;
+}
+
+.form-input {
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+.form-input:focus {
+  outline: none;
+}
+
+.form-button {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.form-button:hover {
+    background-color: #2980b9;
+    cursor: pointer;
 }
 
 .error {
