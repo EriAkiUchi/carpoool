@@ -75,6 +75,18 @@ class ViagemService {
         }
     }
 
+    async finalizarViagem(viagemId: string) {
+        try {
+            const resposta = await api.put(`viagens/${viagemId}`, {
+                status: 'finalizada',
+            });
+            return resposta.data;
+        } catch (error) {
+            console.error('Erro ao finalizar a viagem:', error);
+            throw error;
+        }
+    }
+
 
     // Criar uma nova rota de viagem
     async criarAnuncio(viagemData: any) {

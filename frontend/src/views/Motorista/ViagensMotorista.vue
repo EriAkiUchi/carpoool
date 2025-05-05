@@ -90,6 +90,26 @@ async function cancelarViagem(viagemId: string) {
     }
 }
 
+async function finalizarViagem(viagemId: string) {
+    if (!user.value?.id) return;
+
+    try {
+        isLoading.value = true;
+        error.value = null;
+        
+        // Finalizar viagem
+        await viagemService.finalizarViagem(viagemId);
+        
+        // Recarregar viagens após finalização
+        await carregarViagens();
+    } catch (err) {
+        console.error('Erro ao finalizar viagem:', err);
+        error.value = 'Erro ao finalizar a viagem. Tente novamente mais tarde.';
+    } finally {
+        isLoading.value = false;
+    }
+}
+
 onMounted(async () => {
     // Verificar autenticação
   if (!authStore.isAuthenticated || authStore.userType !== 'motorista') {
@@ -153,6 +173,14 @@ onMounted(async () => {
             class="btn-cancelar">
             Cancelar viagem
           </button>
+
+          <button 
+            v-if="viagem.status === 'em-andamento'"
+            @click="finalizarViagem(viagem.id)" 
+            class="btn-finalizar">
+            Finalizar viagem
+          </button>
+
         </div>
       </div>
     </div>
@@ -264,7 +292,7 @@ onMounted(async () => {
   margin-top: 0.75rem;
 }
 
-.btn-detalhes, .btn-cancelar, .btn-voltar, .btn-primary {
+.btn-detalhes, .btn-cancelar, .btn-voltar, .btn-primary, .btn-finalizar {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 4px;
@@ -292,6 +320,15 @@ onMounted(async () => {
 
 .btn-cancelar:hover {
   background-color: #c0392b;
+}
+
+.btn-finalizar {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-finalizar:hover {
+  background-color: #27ae60;
 }
 
 .btn-voltar, .btn-primary {
