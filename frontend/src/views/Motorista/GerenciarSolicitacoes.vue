@@ -258,4 +258,12 @@ h2 {
   text-align: center;
   margin-top: 2rem;
 }
+
+@media (max-width: 1024px) {
+  .lista-solicitacoes {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}
+
 </style>

@@ -143,7 +143,7 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .dashboard-content {
     flex-direction: column;
-    width: 40%;
+    width: 60%;
   }
 }
 </style>

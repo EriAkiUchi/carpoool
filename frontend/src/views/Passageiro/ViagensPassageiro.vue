@@ -318,4 +318,11 @@ onMounted(async () => {
   text-align: center;
   margin-top: 2rem;
 }
+
+@media (max-width: 1024px) {
+  .lista-viagens {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}
 </style>

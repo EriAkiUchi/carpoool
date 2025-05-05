@@ -343,4 +343,11 @@ async function solicitarViagem(id: string) {
 .btn-voltar:hover {
   background-color: #264d73;
 }
+
+@media (max-width: 1024px) {
+  .buscar-viagens {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}
 </style>
