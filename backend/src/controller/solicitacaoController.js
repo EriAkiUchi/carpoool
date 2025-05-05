@@ -29,7 +29,7 @@ class SolicitacaoController {
                                     .get();
 
             if (snapshot.empty) {
-                return res.status(200).json([]);
+                return res.status(200).json({});
             }
 
             const solicitacao = snapshot.docs.map(doc => Solicitacao.fromFirestore(doc));
