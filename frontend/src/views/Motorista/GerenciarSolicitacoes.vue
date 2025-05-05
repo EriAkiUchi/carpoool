@@ -24,9 +24,14 @@ async function carregarSolicitacoes(){
             error.value = 'Nenhuma solicitação encontrada.';
             return;
         }
-        resposta.map((solicitacao) => 
-            solicitacao.genero === 'M' ? 'Masculino' : 'Feminino'
-        )
+        //modificar o genero para masculino ou feminino
+        resposta.forEach((solicitacao) => {
+            if (solicitacao.genero === 'M') {
+                solicitacao.genero = 'Masculino';
+            } else if (solicitacao.genero === 'F') {
+                solicitacao.genero = 'Feminino';
+            }
+        });
         solicitacoes.value = resposta;
 
     } catch (err) {
