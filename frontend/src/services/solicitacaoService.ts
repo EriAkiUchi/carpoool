@@ -12,7 +12,7 @@ class SolicitacaoService {
         }
     }
 
-    async getSolicitacaoByIds(passageiroId: string, viagemId: string) {
+    async getSolicitacaoByIds(passageiroId: string, viagemId: string):Promise<Solicitacao> {
         try {
             const response = await api.get(`/motoristas/solicitacoes/verificar`, {
                 params: {
