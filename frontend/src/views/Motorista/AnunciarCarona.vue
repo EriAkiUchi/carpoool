@@ -26,6 +26,7 @@ async function handleSubmit() {
     error.value = 'Preencha todos os campos.';
     return;
   }
+  if (!window.confirm('Você tem certeza que deseja criar o anúncio?')) return;
   error.value = '';
 
   const informacoesMotorista:Motorista = await motoristaService.getById(userId.value);

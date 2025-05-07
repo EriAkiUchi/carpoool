@@ -86,6 +86,7 @@ function verDetalhes(viagemId: string) {
 // Função para cancelar viagem
 async function cancelarViagem(viagemId: string) {
   if (!user.value?.id) return;
+  if (!window.confirm('Tem certeza que deseja cancelar esta viagem?')) return;
 
   try {
     isLoading.value = true;

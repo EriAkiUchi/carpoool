@@ -52,6 +52,12 @@ onMounted(async () => {
 });
 
 async function aceitarSolicitacao(aceitar: boolean, idSolicitacao: string, passageiroId: string, viagemId: string) {
+    if (aceitar) {
+        if (!window.confirm('Você tem certeza que deseja aceitar a solicitação?')) return;
+    } 
+    else {
+        if (!window.confirm('Você tem certeza que deseja recusar a solicitação?')) return;
+    }
     const viagem:Viagem = await viagemService.getById(viagemId);
 
     if (aceitar) {

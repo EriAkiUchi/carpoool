@@ -85,6 +85,7 @@ async function buscar() {
 }
 
 async function solicitarViagem(id: string) {
+  if(!window.confirm('Você tem certeza que deseja solicitar essa viagem?')) return;
 	const viagem:Viagem = await viagemService.getById(id);
 
   const buscarSolicitacao:Solicitacao = await solicitacaoService.getSolicitacaoByIds(passageiroId, viagem.id);
