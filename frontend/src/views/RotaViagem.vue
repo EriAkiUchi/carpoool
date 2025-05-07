@@ -51,20 +51,20 @@ async function carregarViagem() {
     passageirosDetalhados.value = viagemData.passageirosIds as any;
   }
 
-    // Se a viagem tem um ID de rota, buscar a rota
-    if (viagem.value && viagem.value.rotaDeViagem) {
-      const rotaData = await mapaRotaService.getRotaById(viagem.value.rotaDeViagem);
-      rota.value = rotaData;
-      
-      // Ajustar o centro do mapa para o primeiro ponto da rota
-      if (rota.value?.rotas?.[0]?.rota?.legs?.[0]?.start_location) {
-        const startLoc = rota.value.rotas[0].rota.legs[0].start_location;
-        center.value = {
-          lat: parseFloat(startLoc.lat),
-          lng: parseFloat(startLoc.lng)
-        };
-      }
+  // Se a viagem tem um ID de rota, buscar a rota
+  if (viagem.value && viagem.value.rotaDeViagem) {
+    const rotaData = await mapaRotaService.getRotaById(viagem.value.rotaDeViagem);
+    rota.value = rotaData;
+    
+    // Ajustar o centro do mapa para o primeiro ponto da rota
+    if (rota.value?.rotas?.[0]?.rota?.legs?.[0]?.start_location) {
+      const startLoc = rota.value.rotas[0].rota.legs[0].start_location;
+      center.value = {
+        lat: parseFloat(startLoc.lat),
+        lng: parseFloat(startLoc.lng)
+      };
     }
+  }
     
   } catch (err) {
     console.error('Erro ao carregar detalhes da viagem:', err);
@@ -74,7 +74,7 @@ async function carregarViagem() {
   }
 }
 
-// Helper to decode using Google Maps geometry library
+// Helper para decodificar polylines usando a biblioteca de geometria do Google Maps
 function decodePath(encoded: string): LatLng[] {
   if (typeof google === 'undefined' || !google.maps.geometry) return [];
   const path = google.maps.geometry.encoding.decodePath(encoded);
@@ -166,7 +166,7 @@ const marcadores = computed<PointMarker[]>(() => {
   return result;
 });
 
-// Initialize the map and add all overlays (polylines and markers)
+// Inicializa o mapa e adiciona todas as sobreposições (polylines e marcadores)
 async function initMap() {
   if (!mapContainer.value) return;
   // Load Google Maps script with geometry library if needed
@@ -182,9 +182,9 @@ async function initMap() {
     zoom: 12,
     mapId: mapId
   });
-  // Fit bounds
+  // bounds para ajustar o mapa ao conteúdo
   const bounds = new google.maps.LatLngBounds();
-  // Add passenger routes
+  // Adiciona as rotas dos passageiros
   for (const rotaP of rotasPassageiros.value) {
     const poly = new google.maps.Polyline({
       path: rotaP.path,
@@ -196,7 +196,7 @@ async function initMap() {
     });
     rotaP.path.forEach(pt => bounds.extend(pt));
   }
-  // Add final route
+  // Adiciona a rota final
   if (rotaFinal.value) {
     new google.maps.Polyline({
       path: rotaFinal.value.path,
@@ -208,7 +208,7 @@ async function initMap() {
     });
     rotaFinal.value.path.forEach(pt => bounds.extend(pt));
   }
-  // Add markers
+  // Adiciona os marcadores
   for (const mk of marcadores.value) {
     let text: string = '';
     if(mk.type === 'embarque') {
@@ -248,7 +248,7 @@ onMounted(async () => {
   await initMap();
 });
 
-// API Key and Map ID from env
+// API Key e Map ID do env
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapId = import.meta.env.VITE_MAP_ID;
 </script>
