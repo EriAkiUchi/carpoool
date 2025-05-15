@@ -308,6 +308,12 @@ const mapId = import.meta.env.VITE_MAP_ID;
       
       <div class="mapa-container">
         <h3>Rota da viagem</h3>
+        <h4>Legendas para os marcadores:</h4>
+        <p>
+          I -> Início da Rota <br>
+          D -> Destino Final <br>
+          E -> Embarque de Passageiro
+        </p>
         <div v-if="rota && googleMapsApiKey">
           <!-- Container para Google Maps -->
           <div ref="mapContainer" class="google-map"></div>
@@ -456,7 +462,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.mapa-container h3 {
+.mapa-container h3, h4, p {
   color: #336699;
   margin-top: 0;
   margin-bottom: 1rem;
