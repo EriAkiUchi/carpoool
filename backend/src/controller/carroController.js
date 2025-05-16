@@ -1,11 +1,10 @@
 import Carro from '../models/Carro.js'
 
-class CarroController{
-
-    /**
+class CarroController{    /**
      * @swagger
      * /carros:
      *  get:
+     *      tags: [Carros]
      *      summary: Retorna todos os carros
      *      responses:
      *          200:
@@ -25,12 +24,11 @@ class CarroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar os carros: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /carros/{id}:
      *   get:
+     *     tags: [Carros]
      *     summary: Retorna um carro pelo ID
      *     parameters:
      *        - in: path
@@ -63,12 +61,11 @@ class CarroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar o carro: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /carros:
      *   post:
+     *      tags: [Carros]
      *      summary: Cria um carro
      *      requestBody:
      *          required: true
@@ -105,12 +102,11 @@ class CarroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em criar o carro: ' + erro });
         }
-    }
-
-    /** 
+    }    /** 
      * @swagger
      * /carros/{id}:
      *  put:
+     *     tags: [Carros]
      *     summary: Atualiza um carro pelo ID
      *     parameters:
      *        - in: path
@@ -168,12 +164,11 @@ class CarroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em atualizar o carro: ' + erro });
         }
-    }
-
-    /** 
+    }    /** 
      * @swagger
      * /carros/{id}:
      *   delete:
+     *     tags: [Carros]
      *     summary: Deleta um carro pelo ID
      *     parameters:
      *       - in: path

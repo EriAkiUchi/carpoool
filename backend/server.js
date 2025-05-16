@@ -16,7 +16,15 @@ app.use(cors({
 
 app.use(express.json()); // Middleware to parse JSON
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs)); // Middleware to serve the Swagger UI
+// Configurações customizadas para o Swagger UI
+const swaggerOptions = {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none } .swagger-ui .info { margin: 30px 0 } .swagger-ui .scheme-container { margin: 0 0 20px }',
+    customSiteTitle: "Carpoool API Documentation",
+    docExpansion: 'none', // none, list, full
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions)); // Middleware to serve the Swagger UI
 
 app.listen(process.env.SERVER_PORT, () => {
     console.log('Server está escutando...');

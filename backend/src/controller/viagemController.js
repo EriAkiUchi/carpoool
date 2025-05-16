@@ -1,11 +1,11 @@
 import Viagem from '../models/Viagem.js';
 import { calcularRotaViagem, updateRotaViagem, deleteRotaViagem } from './MapsController.js';
 
-class ViagemController {
-    /**
+class ViagemController {    /**
      * @swagger
      * /viagens:
      *   get:
+     *     tags: [Viagens]
      *     summary: Retorna todos os viagens
      *     responses:
      *       200:
@@ -26,6 +26,32 @@ class ViagemController {
         }
     }
 
+    /**
+     * @swagger
+     * /viagens/motoristas-mais-proximos:
+     *   get:
+     *     tags: [Viagens]
+     *     summary: Retorna viagens disponíveis de motoristas específicos
+     *     parameters:
+     *       - in: query
+     *         name: motoristasIds
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Lista de IDs de motoristas separados por vírgula
+     *       - in: query
+     *         name: passageiroId
+     *         required: false
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Viagens encontradas
+     *       400:
+     *         description: Parâmetros inválidos
+     *       500:
+     *         description: Erro ao buscar viagens
+     */
     static async getViagensEspecificas(req, res, firestore) {
         try {
             
@@ -84,6 +110,26 @@ class ViagemController {
         }
     }
 
+    /**
+     * @swagger
+     * /viagens/{id}:
+     *   get:
+     *     tags: [Viagens]
+     *     summary: Retorna uma viagem específica pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Viagem encontrada
+     *       404:
+     *         description: Viagem não encontrada
+     *       500:
+     *         description: Erro ao buscar a viagem
+     */
     static async getViagemId(req, res, firestore) {
         try {
             const { id } = req.params;
@@ -100,14 +146,19 @@ class ViagemController {
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar a viagem: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
-     * /viagens/{id}:
+     * /viagens/{userType}/{id}:
      *   get:
-     *     summary: Retorna uma lista de viagens pelo ID
+     *     tags: [Viagens]
+     *     summary: Retorna viagens por tipo e ID de usuário
      *     parameters:
+     *       - in: path
+     *         name: userType
+     *         required: true
+     *         schema:
+     *           type: string
+     *           enum: [motorista, passageiro]
      *       - in: path
      *         name: id
      *         required: true
@@ -115,11 +166,11 @@ class ViagemController {
      *           type: string
      *     responses:
      *       200:
-     *         description: Viagem encontrada
+     *         description: Viagens encontradas
      *       404:
-     *         description: Viagem não encontrada
+     *         description: Nenhuma viagem encontrada para o usuário
      *       500:
-     *         description: Erro em pegar a viagem
+     *         description: Erro ao buscar viagens
      */
     static async getViagensByUserId(req, res, firestore) {
         try {
@@ -178,12 +229,11 @@ class ViagemController {
         } catch (erro) {
             res.status(500).json({ message: 'Erro ao buscar viagens: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /viagens:
      *   post:
+     *     tags: [Viagens]
      *     summary: Cria uma nova viagem
      *     requestBody:
      *       required: true
@@ -227,12 +277,11 @@ class ViagemController {
         } catch (erro) {
             res.status(500).json({ message: 'erro em criar a viagem: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /viagens/{id}:
      *   put:
+     *     tags: [Viagens]
      *     summary: Atualiza uma viagem pelo ID
      *     parameters:
      *       - in: path
@@ -360,6 +409,7 @@ class ViagemController {
      * @swagger
      * /viagens/{id}:
      *   delete:
+     *     tags: [Viagens]
      *     summary: Deleta uma viagem pelo ID
      *     parameters:
      *       - in: path

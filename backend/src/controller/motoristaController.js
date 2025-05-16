@@ -14,12 +14,11 @@ async function geocodeAddress(address) {
     }
 }
 
-class MotoristaController{
-
-    /** 
+class MotoristaController{    /** 
      * @swagger
      * /motoristas:
      *  get:
+     *    tags: [Motoristas]
      *    summary: Retorna todos os motoristas
      *    responses:
      *       200:
@@ -39,12 +38,11 @@ class MotoristaController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar os motoristas: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /motoristas/{id}:
      *  get:
+     *    tags: [Motoristas]
      *    summary: Retorna um motorista pelo ID
      *    parameters:
      *      - in: path 
@@ -77,12 +75,11 @@ class MotoristaController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar o motorista: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /motoristas:
      *  post:
+     *    tags: [Motoristas]
      *    summary: Cria um motorista
      *    requestBody:
      *      required: true
@@ -174,6 +171,7 @@ class MotoristaController{
      * @swagger
      * /motoristas/{id}:
      *   put:
+     *     tags: [Motoristas]
      *     summary: Atualiza um motorista pelo ID
      *     parameters:
      *       - in: path
@@ -191,7 +189,7 @@ class MotoristaController{
      *               nome:
      *                 type: string
      *               email:
-     *                 type: string 
+     *                 type: string
      *               senha:
      *                 type: string
      *               enderecoOrigem:
@@ -275,12 +273,11 @@ class MotoristaController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em atualizar o motorista: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /motoristas/{id}:
      *   delete:
+     *     tags: [Motoristas]
      *     summary: Deleta um motorista pelo ID
      *     parameters:
      *       - in: path

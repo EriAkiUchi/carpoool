@@ -42,12 +42,11 @@ async function geocodeAddress(address) {
     } else {
         throw new Error('Endereço não encontrado:', resposta.data.status);
     }
-}
-
-    /**
+}    /**
      * @swagger
      * /maps/rota/calcular-viagem:
      *   post:
+     *    tags: [Mapas e Rotas]
      *    summary: Calcula a rota da viagem
      *    requestBody:
      *      required: true
@@ -227,6 +226,7 @@ class MapsController {
      * @swagger
      * /maps/distancia/{passageiroId}:
      *   get:
+     *    tags: [Mapas e Rotas]
      *    summary: Calcula o motorista mais próximo de um passageiro
      *    parameters:
      *     - in: path
@@ -290,12 +290,11 @@ class MapsController {
         } catch (erro) {
             res.status(500).json({ message: 'erro em calcular o motorista mais próximo' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /maps/rota/{id}:
      *   get:
+     *    tags: [Mapas e Rotas]
      *    summary: Retorna uma rota pelo ID
      *    parameters:
      *     - in: path
@@ -330,6 +329,32 @@ class MapsController {
         }
     }
 
+    /**
+     * @swagger
+     * /maps/rota/usuario/{userType}/{id}:
+     *   get:
+     *    tags: [Mapas e Rotas]
+     *    summary: Retorna as rotas de um usuário (motorista ou passageiro)
+     *    parameters:
+     *     - in: path
+     *       name: userType
+     *       required: true
+     *       schema:
+     *        type: string
+     *        enum: [motorista, passageiro]
+     *     - in: path
+     *       name: id
+     *       required: true
+     *       schema:
+     *        type: string
+     *    responses:
+     *      200:
+     *        description: Rotas encontradas
+     *      404:
+     *        description: Nenhuma rota encontrada para o usuário
+     *      500:
+     *        description: Erro ao buscar rotas
+     */
     static async getRotasUsuarioId(req, res, firestore) {
         try {
             const { userType, id } = req.params;
@@ -359,12 +384,11 @@ class MapsController {
         } catch (erro) {
             res.status(500).json({ message: 'Erro ao buscar rotas: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /maps/rota:
      *   post:
+     *     tags: [Mapas e Rotas]
      *     summary: Cria uma nova rota
      *     requestBody:
      *       required: true

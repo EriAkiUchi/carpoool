@@ -10,12 +10,11 @@ import cors from 'cors';
 
 const routes = (app, firestore) => {
     app.use(cors());
-    app.use(express.json());
-
-    /**
+    app.use(express.json());    /**
      * @swagger
      * /:
      *   get:
+     *     tags: [Status]
      *     summary: Verifica se a API está rodando
      *     responses:
      *       200:

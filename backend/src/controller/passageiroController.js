@@ -14,12 +14,11 @@ async function geocodeAddress(address) {
     }
 }
 
-class PassageiroController{
-
-    /**
+class PassageiroController{    /**
      * @swagger
      * /passageiros:
      *   get:
+     *     tags: [Passageiros]
      *     summary: Retorna todos os passageiros
      *     responses:
      *       200:
@@ -38,12 +37,11 @@ class PassageiroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar os passageiros: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /passageiros/{id}:
      *   get:
+     *     tags: [Passageiros]
      *     summary: Retorna um passageiro pelo ID
      *     parameters:
      *       - in: path
@@ -76,12 +74,11 @@ class PassageiroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em pegar o passageiro: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /passageiros:
      *   post:
+     *     tags: [Passageiros]
      *     summary: Cria um novo passageiro
      *     requestBody:
      *       required: true
@@ -165,12 +162,11 @@ class PassageiroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em criar o passageiro: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /passageiros/{id}:
      *   put:
+     *     tags: [Passageiros]
      *     summary: Atualiza um passageiro pelo ID
      *     parameters:
      *       - in: path
@@ -269,12 +265,11 @@ class PassageiroController{
         } catch (erro) {
             res.status(500).json({ message: 'erro em atualizar o passageiro: ' + erro });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /passageiros/{id}:
      *   delete:
+     *     tags: [Passageiros]
      *     summary: Deleta um passageiro pelo ID
      *     parameters:
      *       - in: path

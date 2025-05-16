@@ -3,6 +3,7 @@ class AuthController {
      * @swagger
      * /login/passageiro:
      *   post:
+     *     tags: [Autenticação]
      *     summary: Realiza login de passageiro
      *     requestBody:
      *       required: true
@@ -55,12 +56,11 @@ class AuthController {
         } catch (error) {
             res.status(500).json({ message: 'Erro ao realizar login.', error: error.message });
         }
-    }
-
-    /**
+    }    /**
      * @swagger
      * /login/motorista:
      *   post:
+     *     tags: [Autenticação]
      *     summary: Realiza login de motorista
      *     requestBody:
      *       required: true

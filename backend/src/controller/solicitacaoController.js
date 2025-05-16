@@ -2,6 +2,18 @@ import axios from "axios";
 import Solicitacao from "../models/Solicitacao.js";
 
 class SolicitacaoController {
+    /**
+     * @swagger
+     * /motoristas/solicitacoes:
+     *   get:
+     *     tags: [Solicitações]
+     *     summary: Retorna todas as solicitações de carona
+     *     responses:
+     *       200:
+     *         description: Lista de solicitações ou lista vazia
+     *       500:
+     *         description: Erro ao buscar solicitações
+     */
     static async getSolicitacoes(req, res, firestore) {
         try {
             const solicitacoesRef = firestore.collection('solicitacoes');
@@ -19,6 +31,29 @@ class SolicitacaoController {
         }
     }
 
+    /**
+     * @swagger
+     * /motoristas/solicitacoes/verificar:
+     *   get:
+     *     tags: [Solicitações]
+     *     summary: Verifica se existe uma solicitação específica
+     *     parameters:
+     *       - in: query
+     *         name: idPassageiro
+     *         required: true
+     *         schema:
+     *           type: string
+     *       - in: query
+     *         name: idViagem
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Solicitação encontrada ou objeto vazio se não existir
+     *       500:
+     *         description: Erro ao buscar solicitação
+     */
     static async getSolicitacaoId(req, res, firestore) {
         try {
             const { idPassageiro, idViagem } = req.query;
@@ -40,6 +75,35 @@ class SolicitacaoController {
         }
     }
 
+    /**
+     * @swagger
+     * /motoristas/solicitacoes:
+     *   post:
+     *     tags: [Solicitações]
+     *     summary: Cria uma nova solicitação de carona
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               idPassageiro:
+     *                 type: string
+     *               idViagem:
+     *                 type: string
+     *               nomePassageiro:
+     *                 type: string
+     *               enderecoOrigem:
+     *                 type: object
+     *               status:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Solicitação criada com sucesso
+     *       500:
+     *         description: Erro ao criar solicitação
+     */
     static async createSolicitacao(req, res, firestore) {
         try {
             const { idPassageiro, idViagem, nomeEmpresa, nomePassageiro, enderecoOrigem, genero } = req.body;
@@ -55,6 +119,26 @@ class SolicitacaoController {
         }
     }
 
+    /**
+     * @swagger
+     * /motoristas/solicitacoes/{id}:
+     *   delete:
+     *     tags: [Solicitações]
+     *     summary: Deleta uma solicitação pelo ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Solicitação excluída com sucesso
+     *       404:
+     *         description: Solicitação não encontrada
+     *       500:
+     *         description: Erro ao excluir solicitação
+     */
     static async deleteSolicitacao(req, res, firestore) {
         try {
             const { id } = req.params;
