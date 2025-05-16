@@ -16,7 +16,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.SERVER_PORT}`,
+        url: import.meta.env.SERVER_PATH,
         description: 'Servidor da API'
       },
     ],
