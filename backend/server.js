@@ -8,11 +8,7 @@ import dotenv from 'dotenv';
 const app  = express(); // Create an Express app
 const firestore = admin.firestore(); // Get the Firestore instance from the admin SDK
 
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(cors());
 
 app.use(express.json()); // Middleware to parse JSON
 
