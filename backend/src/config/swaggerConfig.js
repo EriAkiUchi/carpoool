@@ -16,7 +16,7 @@ const options = {
     },
     servers: [
       {
-        url: import.meta.env.SERVER_PATH,
+        url: process.env.SERVER_PATH,
         description: 'Servidor da API'
       },
     ],
