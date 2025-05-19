@@ -3,8 +3,13 @@ import admin from 'firebase-admin';
 import fs from 'fs';
 import path from 'path';
 
-const serviceAccountPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));;
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    console.log(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);    
+} else {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON not found in environment variables');
+}
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
