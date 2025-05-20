@@ -9,19 +9,24 @@ const app  = express(); // Create an Express app
 const firestore = admin.firestore(); // Get the Firestore instance from the admin SDK
 
 const allowedOrigins = [
-    'http://localhost:3000',
-    'https://carpoool-rouge.vercel.app/',
-    'https://carpoool-git-main-erics-projects-95bf1a2f.vercel.app/',
-    'https://carpoool-4ygy54x49-erics-projects-95bf1a2f.vercel.app/'
+    'http://localhost:5173',
+    'https://carpoool-rouge.vercel.app',
+    'https://carpoool-git-main-erics-projects-95bf1a2f.vercel.app',
+    'https://carpoool-4ygy54x49-erics-projects-95bf1a2f.vercel.app'
 ]
 
 const corsOptions = {
     origin: function (origin, callback) {
+        // remove barra no final da URL
+        const normalizedOrigin = origin?.endsWith('/') ? origin.slice(0, -1) : origin;
+        console.log(normalizedOrigin);
+
         //permite requsições sem 'origin' ou se a origem estiver na lista
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.log(`Origin rejected by CORS: ${origin}`);
+            callback(null, false); // Reject without throwing error
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
