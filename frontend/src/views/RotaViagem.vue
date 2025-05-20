@@ -351,6 +351,7 @@ const mapId = import.meta.env.VITE_MAP_ID;
 }
 
 .loading, .error-message, .empty-state {
+  color: #336699;
   text-align: center;
   padding: 2rem 0;
   background-color: #f9f9f9;
