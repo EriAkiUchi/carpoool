@@ -105,8 +105,8 @@ npm install
 # VITE_API_URL=http://localhost:3000
 ```
 
-4. Configurar as variáveis de ambiente
-### Backend
+4. Configurar as variáveis de ambiente  
+Backend
 ```bash
 SERVER_PATH = http://localhost:PORTA_DO_SERVER
 SERVER_PORT = PORTA_DO_SERVER
@@ -115,7 +115,7 @@ FRONTEND_URL = http://localhost:PORTA_DO_FRONT
 FIREBASE_SERVICE_ACCOUNT_JSON = CHAVE_DO_FIRESTORE
 ```
 
-### Frontend
+Frontend
 ```bash
 VITE_GOOGLE_MAPS_API_KEY = CHAVE_DO_GOOGLE_MAPS_API
 VITE_MAP_ID = CHAVE_PARA_RENDERIZAR_MAPA
