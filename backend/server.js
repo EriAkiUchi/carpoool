@@ -8,7 +8,28 @@ import dotenv from 'dotenv';
 const app  = express(); // Create an Express app
 const firestore = admin.firestore(); // Get the Firestore instance from the admin SDK
 
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://carpoool-rouge.vercel.app/',
+    'https://carpoool-git-main-erics-projects-95bf1a2f.vercel.app/',
+    'https://carpoool-4ygy54x49-erics-projects-95bf1a2f.vercel.app/'
+]
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        //permite requsições sem 'origin' ou se a origem estiver na lista
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+}
+
+app.use(cors(corsOptions));
 
 app.use(express.json()); // Middleware to parse JSON
 
