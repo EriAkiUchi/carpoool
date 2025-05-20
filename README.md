@@ -82,7 +82,7 @@ frontend/
 - NPM ou Yarn
 - Projeto no Google Cloud: permite obter chaves de API
 
-### Instalação
+### Instalação local
 
 1. Clone o repositório
 ```bash
@@ -94,10 +94,6 @@ cd carpoool
 ```bash
 cd backend
 npm install
-# Configure o arquivo .env com suas credenciais do Firebase
-# Exemplo:
-# SERVER_PORT=3000
-# FRONTEND_URL=http://localhost:5173
 ```
 
 3. Configure o frontend
@@ -107,6 +103,23 @@ npm install
 # Configure o arquivo .env com a URL da API
 # Exemplo:
 # VITE_API_URL=http://localhost:3000
+```
+
+4. Configurar as variáveis de ambiente
+### Backend
+```bash
+SERVER_PATH = http://localhost:PORTA_DO_SERVER
+SERVER_PORT = PORTA_DO_SERVER
+MAPS_API_KEY = CHAVE_DO_GOOGLE_MAPS_API
+FRONTEND_URL = http://localhost:PORTA_DO_FRONT
+FIREBASE_SERVICE_ACCOUNT_JSON = CHAVE_DO_FIRESTORE
+```
+
+### Frontend
+```bash
+VITE_GOOGLE_MAPS_API_KEY = CHAVE_DO_GOOGLE_MAPS_API
+VITE_MAP_ID = CHAVE_PARA_RENDERIZAR_MAPA
+VITE_API_URL = http://localhost:PORTA_DO_SERVER
 ```
 
 ### Executando o Projeto
