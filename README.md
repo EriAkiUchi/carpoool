@@ -106,6 +106,7 @@ npm install
 ```
 
 4. Configurar as variáveis de ambiente  
+
 Backend
 ```bash
 SERVER_PATH = http://localhost:PORTA_DO_SERVER
